@@ -5,6 +5,7 @@ import org.specs2.mutable._
 class BoardSpec extends Specification {
 
   "A new board" should {
+
     "be empty when created" in {
       new Board().toString ==
         "+++++++++\n" +
@@ -22,7 +23,9 @@ class BoardSpec extends Specification {
 
     "allow placing a stone at (1,1)" ! new Board().canPlace(1, 1)
 
-    "disallow placing a stone at (0,0)" ! !new Board().canPlace(0, 0)
+    "disallow placing a stone at (0,0)" in {
+      new Board().canPlace(0, 0) must throwA [IllegalArgumentException]
+    }
   }
 
 }
