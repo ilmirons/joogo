@@ -7,22 +7,21 @@ class BoardSpec extends Specification {
   var board: Board = _
 
   step {
-    board = new Board()
+    board = new Board(9, 7)
   }
 
-  "A new board" should {
+  "A new 9x7 board" should {
 
     "be empty when created" in {
-      board.toString must_==
-        "+++++++++\n" +
-        "+++++++++\n" +
-        "+++++++++\n" +
-        "+++++++++\n" +
-        "+++++++++\n" +
-        "+++++++++\n" +
-        "+++++++++\n" +
-        "+++++++++\n" +
-        "+++++++++\n"
+      board.toString must_== "+++++++++\n" * 7
+    }
+
+    "have a sizeX of 9" in {
+      board.sizeX must_== 9
+    }
+
+    "have a sizeY of 7" in {
+      board.sizeY must_== 7
     }
 
     "allow placing stones" in {
@@ -30,9 +29,9 @@ class BoardSpec extends Specification {
     }
 
     "allow placing a stone at any intersection" in {
-      (1 to board.size) foreach {
-        i => (1 to board.size) foreach {
-          j => board.canPlace(i, j) must beTrue
+      (1 to board.sizeX) foreach {
+        x => (1 to board.sizeY) foreach {
+          y => board.canPlace(x, y) must beTrue
         }
       }
     }
@@ -43,6 +42,11 @@ class BoardSpec extends Specification {
 
     "have black next in turn" in {
       board.whoseTurn must_== Black
+    }
+
+    "contain a stone after placing it" in {
+      val afterFirst = board.place(Black, 1, 2)
+      afterFirst.get(1, 2) must_== Black
     }
 
   }
