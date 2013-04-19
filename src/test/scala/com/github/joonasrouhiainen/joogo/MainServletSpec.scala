@@ -12,11 +12,6 @@ class MainServletSpec extends MutableScalatraSpec {
         status must_== 200
       }
     }
-    "present a board" in {
-      get("/") {
-
-      }
-    }
   }
 
 }
