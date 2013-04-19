@@ -41,6 +41,10 @@ class BoardSpec extends Specification {
       board.canPlace(0, 0) must throwA [IllegalArgumentException]
     }
 
+    "have black next in turn" in {
+      board.whoseTurn must_== Black
+    }
+
   }
 
 }

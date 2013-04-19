@@ -2,21 +2,24 @@ package com.github.joonasrouhiainen.joogo
 
 class Board {
 
-  val size   = 9
-  val stones = Array.ofDim[Int](size, size)
+  val size = 9
+  val intersections = Array.ofDim[Option[Color]](size, size) map(_.map(_ => None))
   val isFull = false
 
   def canPlace(x: Int, y: Int): Boolean = {
     require(x >= 1 && y >= 1 && x <= size && y <= size)
-    stones(x - 1)(y - 1) == 0
+
+    intersections(x - 1)(y - 1) isEmpty
   }
 
   override def toString(): String = {
-    stones.foldLeft("") {
+    intersections.foldLeft("") {
       (boardString, row) => boardString + row.foldLeft("") {
-        (rowString, stone) => rowString + (if (stone == 0) "+" else "*")
+        (rowString, intersection) => rowString + (if (intersection isEmpty) "+" else intersection.get)
       } + "\n"
     }
   }
+
+  def whoseTurn(): Color = Black
 
 }
