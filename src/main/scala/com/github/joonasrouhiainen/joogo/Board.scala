@@ -9,16 +9,22 @@ class Board(val intersections: Array[Array[Option[Color]]], val whoseTurn: Color
   val sizeX  = intersections(0) length
   val sizeY  = intersections length
 
-  def canPlace(x: Int, y: Int): Boolean = {
+  def canPlace(c: Color, x: Int, y: Int): Boolean = {
     require(x >= 1 && y >= 1 && x <= sizeX && y <= sizeY)
 
-    intersections(y - 1)(x - 1) isEmpty
+    whoseTurn == c && intersections(y - 1)(x - 1).isEmpty
+  }
+
+  override def equals(that: Any) = that match {
+    case that: Board => intersections == that.intersections && whoseTurn == that.whoseTurn
+    case _           => false
+
   }
 
   def get(x: Int, y: Int): Option[Color] = intersections(y - 1)(x - 1)
 
   def place(c: Color, x: Int, y: Int): Board = {
-    if (!canPlace(x, y)) {
+    if (!canPlace(c, x, y)) {
       new Board(intersections clone, whoseTurn)
     }
     else {

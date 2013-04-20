@@ -24,20 +24,24 @@ class BoardSpec extends Specification {
       board.sizeY must_== 7
     }
 
-    "allow placing a stone at any intersection" in {
+    "allow placing a black stone at any intersection" in {
       (1 to board.sizeX) foreach {
         x => (1 to board.sizeY) foreach {
-          y => board.canPlace(x, y) must beTrue
+          y => board.canPlace(Black, x, y) must beTrue
         }
       }
     }
 
-    "disallow placing a stone at (0,0)" in {
-      board.canPlace(0, 0) must throwA [IllegalArgumentException]
+    "disallow placing a black stone at (0,0)" in {
+      board.canPlace(Black, 0, 0) must throwA [IllegalArgumentException]
     }
 
     "have black next in turn" in {
       board.whoseTurn must_== Black
+    }
+
+    "disallow placing a white stone" in {
+      board.place(White, 1, 2) must_== board
     }
 
   }
