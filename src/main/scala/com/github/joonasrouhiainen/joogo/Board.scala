@@ -1,9 +1,9 @@
 package com.github.joonasrouhiainen.joogo
 
-class Board(val intersections: Array[Array[Option[Color]]], val whoseTurn: Color) {
+case class Board(val intersections: IndexedSeq[IndexedSeq[Option[Color]]], val whoseTurn: Color) {
 
   def this(sizeX: Int, sizeY: Int) {
-    this(Array.ofDim[Option[Color]](sizeY, sizeX).map(_.map(_ => None.asInstanceOf[Option[Color]])), Black)
+    this(Vector.fill(sizeY, sizeX)(None), Black)
   }
 
   val sizeX  = intersections(0) length
@@ -15,21 +15,15 @@ class Board(val intersections: Array[Array[Option[Color]]], val whoseTurn: Color
     whoseTurn == c && intersections(y - 1)(x - 1).isEmpty
   }
 
-  override def equals(that: Any) = that match {
-    case that: Board => intersections == that.intersections && whoseTurn == that.whoseTurn
-    case _           => false
-
-  }
-
   def get(x: Int, y: Int): Option[Color] = intersections(y - 1)(x - 1)
 
   def place(c: Color, x: Int, y: Int): Board = {
     if (!canPlace(c, x, y)) {
-      new Board(intersections clone, whoseTurn)
+      new Board(intersections, whoseTurn)
     }
     else {
-      val newIntersections = intersections map(_ clone)
-      newIntersections(y - 1)(x - 1) = Some(c)
+      val newRow = intersections(y - 1)
+      val newIntersections = intersections.updated(y - 1, newRow.updated(x - 1, Some(c)))
       new Board(newIntersections, c invert)
     }
   }
