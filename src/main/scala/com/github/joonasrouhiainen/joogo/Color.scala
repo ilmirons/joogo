@@ -1,9 +1,9 @@
 package com.github.joonasrouhiainen.joogo
 
 sealed trait Color {
-  def toChar: Char = this match {
-    case Black => 'b'
-    case White => 'w'
+  override def toString: String = this match {
+    case Black => "b"
+    case White => "w"
   }
 }
 

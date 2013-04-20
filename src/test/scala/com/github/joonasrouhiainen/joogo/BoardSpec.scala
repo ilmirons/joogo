@@ -46,16 +46,33 @@ class BoardSpec extends Specification {
 
   }
 
-  "Placing a stone on an empty board" should {
+  "Placing a black stone on an empty board" should {
 
     "make the stone retrievable" in {
       board.place(Black, 1, 2).get(1, 2).get must_== Black
+    }
+
+    "make the stone appear at the right place" in {
+      board.place(Black, 1, 2).toString must_==
+      "+++++++++\n" +
+      "b++++++++\n" +
+      "+++++++++\n" +
+      "+++++++++\n" +
+      "+++++++++\n" +
+      "+++++++++\n" +
+      "+++++++++\n"
     }
 
     "leave the original board state untouched" in {
       board.place(Black, 1, 2)
       board.get(1, 2).isEmpty must beTrue
     }
+
+    /*
+    "make it white's turn" in {
+      board.place(Black, 1, 2).whoseTurn() must_== White
+    }
+    */
 
   }
 

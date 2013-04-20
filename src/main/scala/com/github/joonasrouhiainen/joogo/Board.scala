@@ -16,7 +16,7 @@ class Board(val intersections: Array[Array[Option[Color]]]) {
     intersections(y - 1)(x - 1) isEmpty
   }
 
-  def get(x: Int, y: Int): Option[Color] = intersections(y)(x)
+  def get(x: Int, y: Int): Option[Color] = intersections(y - 1)(x - 1)
 
   def place(c: Color, x: Int, y: Int): Board = {
     if (!canPlace(x, y)) {
@@ -24,7 +24,7 @@ class Board(val intersections: Array[Array[Option[Color]]]) {
     }
     else {
       val newIntersections = intersections map(_ clone)
-      newIntersections(y)(x) = Some(c)
+      newIntersections(y - 1)(x - 1) = Some(c)
       new Board(newIntersections)
     }
   }
