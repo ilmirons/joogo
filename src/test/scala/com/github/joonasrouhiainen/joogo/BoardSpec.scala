@@ -44,9 +44,17 @@ class BoardSpec extends Specification {
       board.whoseTurn must_== Black
     }
 
-    "contain a stone after placing it" in {
-      val afterFirst = board.place(Black, 1, 2)
-      afterFirst.get(1, 2) must_== Black
+  }
+
+  "Placing a stone on an empty board" should {
+
+    "make the stone retrievable" in {
+      board.place(Black, 1, 2).get(1, 2).get must_== Black
+    }
+
+    "leave the original board state untouched" in {
+      board.place(Black, 1, 2)
+      board.get(1, 2).isEmpty must beTrue
     }
 
   }

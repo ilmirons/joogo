@@ -23,7 +23,9 @@ class Board(val intersections: Array[Array[Option[Color]]]) {
       new Board(intersections clone)
     }
     else {
-      new Board(intersections clone)
+      val newIntersections = intersections map(_ clone)
+      newIntersections(y)(x) = Some(c)
+      new Board(newIntersections)
     }
   }
 
