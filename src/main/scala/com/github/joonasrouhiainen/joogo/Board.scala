@@ -1,9 +1,9 @@
 package com.github.joonasrouhiainen.joogo
 
-class Board(val intersections: Array[Array[Option[Color]]]) {
+class Board(val intersections: Array[Array[Option[Color]]], val whoseTurn: Color) {
 
   def this(sizeX: Int, sizeY: Int) {
-    this(Array.ofDim[Option[Color]](sizeY, sizeX).map(_.map(_ => None.asInstanceOf[Option[Color]])))
+    this(Array.ofDim[Option[Color]](sizeY, sizeX).map(_.map(_ => None.asInstanceOf[Option[Color]])), Black)
   }
 
   val isFull = false
@@ -20,12 +20,12 @@ class Board(val intersections: Array[Array[Option[Color]]]) {
 
   def place(c: Color, x: Int, y: Int): Board = {
     if (!canPlace(x, y)) {
-      new Board(intersections clone)
+      new Board(intersections clone, whoseTurn)
     }
     else {
       val newIntersections = intersections map(_ clone)
       newIntersections(y - 1)(x - 1) = Some(c)
-      new Board(newIntersections)
+      new Board(newIntersections, c invert)
     }
   }
 
@@ -36,7 +36,5 @@ class Board(val intersections: Array[Array[Option[Color]]]) {
       } + "\n"
     }
   }
-
-  def whoseTurn(): Color = Black
 
 }

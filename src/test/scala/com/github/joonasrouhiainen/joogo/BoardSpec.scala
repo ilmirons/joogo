@@ -68,11 +68,9 @@ class BoardSpec extends Specification {
       board.get(1, 2).isEmpty must beTrue
     }
 
-    /*
     "make it white's turn" in {
-      board.place(Black, 1, 2).whoseTurn() must_== White
+      board.place(Black, 1, 2).whoseTurn must_== White
     }
-    */
 
   }
 
