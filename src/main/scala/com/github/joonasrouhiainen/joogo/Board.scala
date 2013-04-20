@@ -6,7 +6,6 @@ class Board(val intersections: Array[Array[Option[Color]]], val whoseTurn: Color
     this(Array.ofDim[Option[Color]](sizeY, sizeX).map(_.map(_ => None.asInstanceOf[Option[Color]])), Black)
   }
 
-  val isFull = false
   val sizeX  = intersections(0) length
   val sizeY  = intersections length
 

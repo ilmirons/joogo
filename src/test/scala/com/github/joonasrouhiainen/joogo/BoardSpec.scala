@@ -24,10 +24,6 @@ class BoardSpec extends Specification {
       board.sizeY must_== 7
     }
 
-    "allow placing stones" in {
-      board.isFull must beFalse
-    }
-
     "allow placing a stone at any intersection" in {
       (1 to board.sizeX) foreach {
         x => (1 to board.sizeY) foreach {
