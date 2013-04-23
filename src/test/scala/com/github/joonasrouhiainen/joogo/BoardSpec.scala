@@ -2,6 +2,11 @@ package com.github.joonasrouhiainen.joogo
 
 import org.specs2.mutable._
 
+/**
+ * Unit tests for classes Board and Color.
+ *
+ * @author Joonas Rouhiainen
+ */
 class BoardSpec extends Specification {
 
   "A new 0x0 board" should {
@@ -167,19 +172,19 @@ class BoardSpec extends Specification {
 
     val board = new Board(9, 7).play(1, 1).play(1, 2).endTurn.play(2, 1)
 
-    "make it unretrievable from the position" in {
-      board.get(1, 1).isEmpty must beTrue
+    "make it disappear from the board string" in {
+      board.toString must_==
+        "+w+++++++\n" +
+          "w++++++++\n" +
+          "+++++++++\n" +
+          "+++++++++\n" +
+          "+++++++++\n" +
+          "+++++++++\n" +
+          "+++++++++\n"
     }
 
-    "make it disappear from the board" in {
-      board.toString must_==
-      "+w+++++++\n" +
-      "w++++++++\n" +
-      "+++++++++\n" +
-      "+++++++++\n" +
-      "+++++++++\n" +
-      "+++++++++\n" +
-      "+++++++++\n"
+    "make it unretrievable from the position" in {
+      board.get(1, 1).isEmpty must beTrue
     }
 
     "make white player's captured count 1" in {
@@ -189,22 +194,41 @@ class BoardSpec extends Specification {
 
   "Taking the last liberty from a single white stone in the center" should {
 
-    val board = new Board(9, 7).play(5, 3).play(5, 4).play(5, 5).endTurn().play(4, 4).endTurn.play(6, 4)
+    val board = new Board(9, 7).play(5, 3).play(5, 4).play(5, 5).endTurn.play(4, 4).endTurn.play(6, 4)
 
-    "remove that stone from the board" in {
+    "make it disappear from the board string" in {
+      board.toString must_==
+        "+++++++++\n" +
+          "+++++++++\n" +
+          "++++b++++\n" +
+          "+++b+b+++\n" +
+          "++++b++++\n" +
+          "+++++++++\n" +
+          "+++++++++\n"
+    }
+
+    "make it unretrievable from the position" in {
       board.get(5, 4).isEmpty must beTrue
     }
 
-    "make it disappear from the board" in {
-      board.toString must_==
-      "+++++++++\n" +
-      "+++++++++\n" +
-      "++++b++++\n" +
-      "+++b+b+++\n" +
-      "++++b++++\n" +
-      "+++++++++\n" +
-      "+++++++++\n"
+  }
+
+  "A board with a lonely black diamond where white tries to play inside the diamond" should {
+
+    val board = new Board(9, 7).play(5, 3).endTurn.play(5, 5).endTurn.play(4, 4).endTurn.play(6, 4).play(5, 4)
+
+    "not add white stones to the board string" in {
+      board.toString must not contain White
+    }
+
+    "keep the diamond eye empty" in {
+      board.get(5, 4).isEmpty must beTrue
+    }
+
+    "keep white still in turn" in {
+      board.whoseTurn must_== White
     }
 
   }
+
 }

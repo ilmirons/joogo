@@ -1,6 +1,13 @@
 package com.github.joonasrouhiainen.joogo
 
+/**
+ * Represents a go stone color.
+ *
+ * @author Joonas Rouhiainen
+ */
 sealed trait Color {
+
+  implicit def color2string(c: Color) = c toString
 
   def invert: Color = this match {
     case Black => White

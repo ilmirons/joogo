@@ -5,6 +5,8 @@ import scala.Some
 
 /**
  * Represents a rectangular go board with a minimum size of 1x1.
+ *
+ * @author Joonas Rouhiainen
  */
 case class Board(val intersections:     IndexedSeq[IndexedSeq[Option[Color]]],
                  val capturesForColors: Map[Color, Int],
@@ -43,7 +45,13 @@ case class Board(val intersections:     IndexedSeq[IndexedSeq[Option[Color]]],
    */
   def canPlay(c: Color, x: Int, y: Int): Boolean = {
     require(canGet(x, y))
-    whoseTurn == c && intersections(y - 1)(x - 1).isEmpty
+
+    // The correct color must be in turn.
+    whoseTurn == c &&
+    // The intersection must be empty.
+    intersections(y - 1)(x - 1).isEmpty &&
+    // The intersection can't have zero liberties and be surrounded by opponent's stones.
+    !(liberties(x, y) == 0 && neighbors(x, y).forall(_.get == whoseTurn.invert))
   }
 
   def endTurn(): Board = new Board(intersections, capturesForColors, whoseTurn invert)
@@ -55,6 +63,8 @@ case class Board(val intersections:     IndexedSeq[IndexedSeq[Option[Color]]],
     require(canGet(x, y))
     intersections(y - 1)(x - 1)
   }
+
+  def liberties(x: Int, y: Int): Int = neighbors(x, y).count(_.isEmpty)
 
   /**
    * Returns all neighboring intersections for the given position.
