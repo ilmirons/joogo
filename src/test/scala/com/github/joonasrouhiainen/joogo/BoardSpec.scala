@@ -30,6 +30,11 @@ class BoardSpec extends Specification {
       board.sizeY must_== 7
     }
 
+    "have black and white captured count of 0" in {
+      board.capturesForColors(Black) must_== 0
+      board.capturesForColors(Black) must_== board.capturesForColors(White)
+    }
+
     "allow playing a black stone at any intersection" in {
       (1 to board.sizeX) foreach {
         x => (1 to board.sizeY) foreach {
@@ -143,7 +148,7 @@ class BoardSpec extends Specification {
     }
   }
 
-  "Taking the last liberty from a single stone in a corner" should {
+  "Taking the last liberty from a single black stone in a corner" should {
 
     val board = new Board(9, 7).play(1, 1).play(1, 2).play(9, 7).play(2, 1)
 
@@ -156,6 +161,10 @@ class BoardSpec extends Specification {
       "+++++++++\n" +
       "+++++++++\n" +
       "++++++++b\n"
+    }
+
+    "make white player's captured count 1" in {
+      board.capturesForColors(White) must_== 1
     }
 
   }

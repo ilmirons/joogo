@@ -1,6 +1,7 @@
 package com.github.joonasrouhiainen.joogo
 
 sealed trait Color {
+
   def invert: Color = this match {
     case Black => White
     case White => Black
@@ -10,6 +11,7 @@ sealed trait Color {
     case Black => "b"
     case White => "w"
   }
+
 }
 
 case object Black extends Color
