@@ -72,6 +72,7 @@ class BoardSpec extends Specification {
 
     val emptyBoard = new Board(9, 7)
     val board      = emptyBoard.play(1, 2)
+    val neighbors  = Set((1,1), (2,2), (1,3))
 
     "make a black stone retrievable from the position" in {
       board.get(1, 2).get must_== Black
@@ -96,18 +97,20 @@ class BoardSpec extends Specification {
       board.whoseTurn must_== White
     }
 
-    "make neighbor at (1,1) have exactly one neighbor" in {
-      board.neighbors(1, 1).count(_.isDefined) must_== 1
+    neighbors.foreach {
+      case (x: Int, y: Int) => {
+
+        val pos = "(" + x + ", " + y + ")"
+
+        "make neighbor at " + pos + " have exactly one neighbor" in {
+          board.neighbors(x, y).count(_.isDefined) must_== 1
+        }
+
+        "make neighbor at " + pos + " have a black neighbor" in {
+          board.neighbors(x, y).find(_.isDefined).get.get must_== Black
+        }
+      }
     }
-
-    "make neighbor at (1,1) have a black neighbor" in {
-      board.neighbors(1,1).find(_.isDefined).get.get must_== Black
-    }
-
-    //"make all neighbors have exactly one black neighbor" in {
-      // board.neighbors(1,1) == board.neighbors(2,2) == board.neighbors(1,3)
-    //}
-
   }
 
 }

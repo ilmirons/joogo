@@ -42,18 +42,11 @@ case class Board(val intersections: IndexedSeq[IndexedSeq[Option[Color]]], val w
   def neighbors(x: Int, y: Int): Set[Option[Color]] = {
 
     // Coordinate differences for neighboring intersections in four directions: left, right, up, down.
-    val neighborCoordDiffs = List((-1, 0), (1, 0), (0, -1), (0, 1))
+    val neighborCoordDiffs = Set((-1, 0), (1, 0), (0, -1), (0, 1))
 
-    // Build map with direction legality as boolean key and coordinate difference as value.
-    val neighborCoordDiffsForPredicates: Map[Boolean, (Int, Int)] = neighborCoordDiffs.map({
-      case (dx: Int, dy: Int) => (canGet(x + dx, y + dy), (dx, dy))
-    }).toMap
-
-    // Map all applicable coordinate differences to actual neighbor intersections.
-    neighborCoordDiffsForPredicates.filterKeys(_ == true).values.map{
-      case (dx: Int, dy: Int) => get(x + dx, y + dy)
-    }.toSet
-
+    // Filter all legal differences for this position and map them to actual intersections
+    neighborCoordDiffs.filter({ case (dx: Int, dy: Int) => canGet(x + dx, y + dy)})
+                      .map   ({ case (dx: Int, dy: Int) => get(x + dx, y + dy)}).toSet
   }
 
   /**
