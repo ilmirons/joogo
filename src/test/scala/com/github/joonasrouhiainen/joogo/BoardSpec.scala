@@ -30,7 +30,7 @@ class BoardSpec extends Specification {
       board.sizeY must_== 7
     }
 
-    "allow play a black stone at any intersection" in {
+    "allow playing a black stone at any intersection" in {
       (1 to board.sizeX) foreach {
         x => (1 to board.sizeY) foreach {
           y => board.canPlay(Black, x, y) must beTrue
@@ -43,7 +43,7 @@ class BoardSpec extends Specification {
 
         val pos = "(" + x + ", " + y + ")"
 
-        "disallow placing a black stone at " + pos in {
+        "disallow playing a black stone at " + pos in {
           board.canPlay(Black, x, y) must throwA [IllegalArgumentException]
         }
 
