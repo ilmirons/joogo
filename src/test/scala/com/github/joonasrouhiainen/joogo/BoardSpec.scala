@@ -165,9 +165,13 @@ class BoardSpec extends Specification {
 
   "Taking the last liberty from a single black stone in a corner" should {
 
-    val board = new Board(9, 7).play(1, 1).play(1, 2).play(9, 7).play(2, 1)
+    val board = new Board(9, 7).play(1, 1).play(1, 2).endTurn.play(2, 1)
 
-    "remove that stone from the board" in {
+    "make it unretrievable from the position" in {
+      board.get(1, 1).isEmpty must beTrue
+    }
+
+    "make it disappear from the board" in {
       board.toString must_==
       "+w+++++++\n" +
       "w++++++++\n" +
@@ -175,11 +179,31 @@ class BoardSpec extends Specification {
       "+++++++++\n" +
       "+++++++++\n" +
       "+++++++++\n" +
-      "++++++++b\n"
+      "+++++++++\n"
     }
 
     "make white player's captured count 1" in {
       board.capturesForColors(White) must_== 1
+    }
+  }
+
+  "Taking the last liberty from a single white stone in the center" should {
+
+    val board = new Board(9, 7).play(5, 3).play(5, 4).play(5, 5).endTurn().play(4, 4).endTurn.play(6, 4)
+
+    "remove that stone from the board" in {
+      board.get(5, 4).isEmpty must beTrue
+    }
+
+    "make it disappear from the board" in {
+      board.toString must_==
+      "+++++++++\n" +
+      "+++++++++\n" +
+      "++++b++++\n" +
+      "+++b+b+++\n" +
+      "++++b++++\n" +
+      "+++++++++\n" +
+      "+++++++++\n"
     }
 
   }
