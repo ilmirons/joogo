@@ -61,8 +61,31 @@ case class Board(val intersections: IndexedSeq[IndexedSeq[Option[Color]]], val w
       new Board(intersections, whoseTurn)
     }
     else {
-      new Board(replace(Some(whoseTurn), x, y).intersections, whoseTurn invert)
+      // Put the stone in place, remove captured stones, return a board with other color in turn.
+      new Board(replace(Some(whoseTurn), x, y).removeCaptured.intersections, whoseTurn invert)
     }
+  }
+
+  private def removeCaptured(): Board = {
+    var operatedBoard = new Board(intersections, whoseTurn)
+
+    (1 to sizeX).foreach {
+      x => (1 to sizeY).foreach {
+        y => {
+          val pos = get(x, y)
+
+          if (pos isDefined) {
+            val ownColor = pos get
+            val neighboring: Vector[Option[Color]] = neighbors(x, y)
+
+            if (neighboring.forall(_.isDefined) && neighboring.forall(_.get == ownColor.invert)) {
+              operatedBoard = replace(None, x, y)
+            }
+          }
+        }
+      }
+    }
+    operatedBoard
   }
 
   /**

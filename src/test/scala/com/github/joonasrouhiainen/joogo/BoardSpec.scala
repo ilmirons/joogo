@@ -143,4 +143,20 @@ class BoardSpec extends Specification {
     }
   }
 
+  "Taking the last liberty from a single stone in a corner" should {
+
+    val board = new Board(9, 7).play(1, 1).play(1, 2).play(9, 7).play(2, 1)
+
+    "remove that stone from the board" in {
+      board.toString must_==
+      "+w+++++++\n" +
+      "w++++++++\n" +
+      "+++++++++\n" +
+      "+++++++++\n" +
+      "+++++++++\n" +
+      "+++++++++\n" +
+      "++++++++b\n"
+    }
+
+  }
 }
