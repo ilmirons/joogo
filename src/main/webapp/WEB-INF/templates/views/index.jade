@@ -1,0 +1,15 @@
+-@ val board: com.github.joonasrouhiainen.joogo.Board
+
+h1 JooGo
+
+p Play go online with JooGo!
+
+p Board
+
+pre
+	= board
+
+form(action="/" method="POST")
+	input#x(name="x")
+	input#y(name="y")
+	button(type="submit") Make a move!

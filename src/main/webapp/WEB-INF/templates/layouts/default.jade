@@ -1,12 +1,13 @@
--@ val title: String
--@ val headline: String = title
 -@ val body: String
+-@ val board: com.github.joonasrouhiainen.joogo.Board
 
-!!!
-html
+!!! 5
+html(lang="en")
   head
-    title= title
+    title JooGo
+    meta(charset="utf-8")
+    meta(name="viewport"    content="width=device-width initial-scale=1.0")
+    meta(name="description" content="Play go in your browser!")
+    meta(name="author"      content="Joonas Rouhiainen")
   body
-    #content
-      h1= headline
-      != body
+    != body
