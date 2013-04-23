@@ -10,6 +10,14 @@ class BoardSpec extends Specification {
     board = new Board(9, 7)
   }
 
+  "A new 0x0 board" should {
+
+    "be disallowed" in {
+      new Board(0, 0) must throwA[IllegalArgumentException]
+    }
+
+  }
+
   "A new 9x7 board" should {
 
     "be empty when created" in {
@@ -40,7 +48,7 @@ class BoardSpec extends Specification {
       board.whoseTurn must_== Black
     }
 
-    "disallow placing a white stone" in {
+    "not react to placing a white stone" in {
       board.place(White, 1, 2) must_== board
     }
 
