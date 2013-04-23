@@ -12,6 +12,17 @@ class BoardSpec extends Specification {
 
   }
 
+  "A new square 9 board" should {
+
+    val board = new Board(9)
+
+    "be 9x9" in {
+      board.width  must_== 9
+      board.height must_== 9
+    }
+
+  }
+
   "A new 9x7 board" should {
 
     val board = new Board(9, 7)

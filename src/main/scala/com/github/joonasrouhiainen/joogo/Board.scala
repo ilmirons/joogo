@@ -14,10 +14,17 @@ case class Board(val intersections:     IndexedSeq[IndexedSeq[Option[Color]]],
   val height = intersections length
 
   /**
-   * Constructs an empty board with the given size.
+   * Constructs an empty rectangular board with the given dimensions.
    */
   def this(sizeX: Int, sizeY: Int) {
     this(Board.emptyIntersections(sizeX, sizeY), Map(Black -> 0, White -> 0), Black)
+  }
+
+  /**
+   * Constructs an empty square board with the given width and height.
+   */
+  def this(sideLength: Int) {
+    this(sideLength, sideLength)
   }
 
   private def addCaptureForColor(c: Color, capture: Int): Board = {
@@ -119,9 +126,9 @@ case class Board(val intersections:     IndexedSeq[IndexedSeq[Option[Color]]],
 
 object Board {
 
-  def emptyIntersections(sizeX: Int, sizeY: Int): IndexedSeq[IndexedSeq[Option[Color]]] = {
-    require(sizeX > 0 && sizeY > 0)
-    Vector.fill(sizeY, sizeX)(None)
+  def emptyIntersections(width: Int, height: Int): IndexedSeq[IndexedSeq[Option[Color]]] = {
+    require(width > 0 && height > 0)
+    Vector.fill(height, width)(None)
   }
 
 }
