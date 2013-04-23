@@ -15,19 +15,19 @@ class BoardSpec extends Specification {
   "A new 9x7 board" should {
 
     val board = new Board(9, 7)
-    val cornerCoords  = Set((1, 1), (1, board.sizeY), (board.sizeX, 1), (board.sizeX, board.sizeY))
-    val illegalCoords = Set((0, 0), (-1, -1), (board.sizeY + 1, board.sizeY + 1))
+    val cornerCoords  = Set((1, 1), (1, board.height), (board.width, 1), (board.width, board.height))
+    val illegalCoords = Set((0, 0), (-1, -1), (board.height + 1, board.height + 1))
 
     "be empty when created" in {
       board.toString must_== "+++++++++\n" * 7
     }
 
-    "have a sizeX of 9" in {
-      board.sizeX must_== 9
+    "have a width of 9" in {
+      board.width must_== 9
     }
 
-    "have a sizeY of 7" in {
-      board.sizeY must_== 7
+    "have a height of 7" in {
+      board.height must_== 7
     }
 
     "have black and white captured count of 0" in {
@@ -36,8 +36,8 @@ class BoardSpec extends Specification {
     }
 
     "allow playing a black stone at any intersection" in {
-      (1 to board.sizeX) foreach {
-        x => (1 to board.sizeY) foreach {
+      (1 to board.width) foreach {
+        x => (1 to board.height) foreach {
           y => board.canPlay(Black, x, y) must beTrue
         }
       }
@@ -63,17 +63,21 @@ class BoardSpec extends Specification {
       board.whoseTurn must_== Black
     }
 
+    "have white next in turn after a pass" in {
+      board.endTurn.whoseTurn must_== White
+    }
+
     "have only empty neighbors for every intersection" in {
-      (1 to board.sizeX) foreach {
-        x => (1 to board.sizeY) foreach {
+      (1 to board.width) foreach {
+        x => (1 to board.height) foreach {
           y => board.neighbors(x, y).foreach(_.isEmpty must beTrue)
         }
       }
     }
 
     "have a neighbor count of 4 for all intersections not near the edges" in {
-      (2 until board.sizeX) foreach {
-        x => (2 until board.sizeY) foreach {
+      (2 until board.width) foreach {
+        x => (2 until board.height) foreach {
           y => board.neighbors(x, y).size must_== 4
         }
       }
@@ -92,12 +96,12 @@ class BoardSpec extends Specification {
       val mustHaveThreeNeighbors = (x: Int, y: Int) => if (!cornerCoords.contains((x, y))) board.neighbors(x, y).size must_== 3
 
       // First row and last row
-      List(1, board.sizeY).foreach { y =>
-        (2 until board.sizeX).foreach(x => mustHaveThreeNeighbors(x, y))
+      List(1, board.height).foreach { y =>
+        (2 until board.width).foreach(x => mustHaveThreeNeighbors(x, y))
       }
       // First col and last col
-      List(1, board.sizeX).foreach{ x =>
-        (2 until board.sizeY).foreach(y => mustHaveThreeNeighbors(x, y))
+      List(1, board.width).foreach{ x =>
+        (2 until board.height).foreach(y => mustHaveThreeNeighbors(x, y))
       }
     }
 

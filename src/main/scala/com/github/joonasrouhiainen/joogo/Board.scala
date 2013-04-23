@@ -10,8 +10,8 @@ case class Board(val intersections:     IndexedSeq[IndexedSeq[Option[Color]]],
                  val capturesForColors: Map[Color, Int],
                  val whoseTurn: Color) {
 
-  val sizeX = intersections(0) length
-  val sizeY = intersections length
+  val width  = intersections(0) length
+  val height = intersections length
 
   /**
    * Constructs an empty board with the given size.
@@ -29,7 +29,7 @@ case class Board(val intersections:     IndexedSeq[IndexedSeq[Option[Color]]],
   /**
    * Checks whether the coordinates are legal.
    */
-  def canGet(x: Int, y: Int) = (x >= 1 && y >= 1 && x <= sizeX && y <= sizeY)
+  def canGet(x: Int, y: Int) = (x >= 1 && y >= 1 && x <= width && y <= height)
 
   /**
    * Checks that it is the right color's turn and that the intersection is empty.
@@ -79,8 +79,8 @@ case class Board(val intersections:     IndexedSeq[IndexedSeq[Option[Color]]],
     var operatedBoard = new Board(intersections, capturesForColors, whoseTurn)
     var capturedCount = 0
 
-    (1 to sizeX).foreach {
-      x => (1 to sizeY).foreach {
+    (1 to width).foreach {
+      x => (1 to height).foreach {
         y => {
           val pos = get(x, y)
 
