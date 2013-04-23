@@ -6,9 +6,11 @@ import scala.xml.XML
 
 class MainServlet extends JoogoStack with ScalateSupport {
 
+  var board = new Board(9)
+
   get("/") {
     contentType = "text/html"
-    jade("index", "board" -> new Board(9))
+    jade("index", "board" -> board)
   }
 
   post("/") {
@@ -17,9 +19,9 @@ class MainServlet extends JoogoStack with ScalateSupport {
     if (params.get("x").isDefined && params.get("y").isDefined) {
       val x = params.get("x").get.toInt
       val y = params.get("y").get.toInt
-      jade("index", "board" -> new Board(9).play(x, y))
+      board = board.play(x, y)
     }
-    jade("index", "board" -> new Board(9))
+    jade("index", "board" -> board)
   }
   
 }
