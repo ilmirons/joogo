@@ -44,22 +44,18 @@ class BoardSpec extends Specification {
       board.whoseTurn must_== Black
     }
 
-    "not react to placing a white stone" in {
-      board.place(White, 1, 2) must_== board
-    }
-
   }
 
-  "Placing a black stone on an empty board" should {
+  "Placing the first stone on an empty board" should {
 
     val emptyBoard = new Board(9, 7)
-    val board      = emptyBoard.place(Black, 1, 2)
+    val board      = emptyBoard.play(1, 2)
 
-    "make the stone retrievable" in {
+    "make a black stone retrievable from the position" in {
       board.get(1, 2).get must_== Black
     }
 
-    "make the stone appear at the right place" in {
+    "make a black stone appear at the right place" in {
       board.toString must_==
       "+++++++++\n" +
       "b++++++++\n" +

@@ -33,18 +33,25 @@ case class Board(val intersections: IndexedSeq[IndexedSeq[Option[Color]]], val w
   def get(x: Int, y: Int): Option[Color] = intersections(y - 1)(x - 1)
 
   /**
-   * If placement is possible, returns a clone of the board with a new stone at given position.
-   * If placement is not possible, returns a clone of the current board.
+   * If placement is possible, returns a clone of the board with a new stone at given position and with the other player in turn.
+   * If placement is not possible, returns a clone of the current board without ending the turn.
    */
-  def place(c: Color, x: Int, y: Int): Board = {
-    if (!canPlace(c, x, y)) {
+  def play(x: Int, y: Int): Board = {
+    if (!canPlace(whoseTurn, x, y)) {
       new Board(intersections, whoseTurn)
     }
     else {
-      val newRow = intersections(y - 1)
-      val newIntersections = intersections.updated(y - 1, newRow.updated(x - 1, Some(c)))
-      new Board(newIntersections, c invert)
+      new Board(replace(Some(whoseTurn), x, y).intersections, whoseTurn invert)
     }
+  }
+
+  /**
+   * Replaces or removes a stone at given position without ending the turn.
+   */
+  private def replace(intersection: Option[Color], x: Int, y: Int): Board = {
+    val newRow = intersections(y - 1)
+    val newIntersections = intersections.updated(y - 1, newRow.updated(x - 1, intersection))
+    new Board(newIntersections, whoseTurn)
   }
 
   override def toString(): String = {
