@@ -4,8 +4,6 @@ import org.specs2.mutable._
 
 class BoardSpec extends Specification {
 
-  val illegalCoords = Set((0, 0), (-1, -1), (99, 99))
-
   "A new 0x0 board" should {
 
     "be disallowed" in {
@@ -17,6 +15,8 @@ class BoardSpec extends Specification {
   "A new 9x7 board" should {
 
     val board = new Board(9, 7)
+    val cornerCoords  = Set((1, 1), (1, board.sizeY), (board.sizeX, 1), (board.sizeX, board.sizeY))
+    val illegalCoords = Set((0, 0), (-1, -1), (board.sizeY + 1, board.sizeY + 1))
 
     "be empty when created" in {
       board.toString must_== "+++++++++\n" * 7
@@ -38,7 +38,7 @@ class BoardSpec extends Specification {
       }
     }
 
-    illegalCoords.foreach{
+    illegalCoords.foreach {
       case (x: Int, y: Int) => {
 
         val pos = "(" + x + ", " + y + ")"
@@ -54,6 +54,10 @@ class BoardSpec extends Specification {
       }
     }
 
+    "have black next in turn" in {
+      board.whoseTurn must_== Black
+    }
+
     "have only empty neighbors for every intersection" in {
       (1 to board.sizeX) foreach {
         x => (1 to board.sizeY) foreach {
@@ -62,8 +66,20 @@ class BoardSpec extends Specification {
       }
     }
 
-    "have black next in turn" in {
-      board.whoseTurn must_== Black
+    "have a neighbor count of 4 for all intersections not near the edges" in {
+      (2 until board.sizeX) foreach {
+        x => (2 until board.sizeY) foreach {
+          y => board.neighbors(x, y).size must_== 4
+        }
+      }
+    }
+
+    "have a neighbor count of 2 for intersections in the four corners" in {
+      cornerCoords.foreach {
+        case (x: Int, y: Int) => {
+          board.neighbors(x, y).size must_== 2
+        }
+      }
     }
 
   }
@@ -72,7 +88,7 @@ class BoardSpec extends Specification {
 
     val emptyBoard = new Board(9, 7)
     val board      = emptyBoard.play(1, 2)
-    val neighbors  = Set((1,1), (2,2), (1,3))
+    val neighbors  = Set((1, 1), (2, 2), (1,3))
 
     "make a black stone retrievable from the position" in {
       board.get(1, 2).get must_== Black

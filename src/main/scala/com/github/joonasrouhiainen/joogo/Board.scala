@@ -18,6 +18,9 @@ case class Board(val intersections: IndexedSeq[IndexedSeq[Option[Color]]], val w
     this(Board.emptyIntersections(sizeX, sizeY), Black)
   }
 
+  /**
+   * Checks whether the coordinates are legal.
+   */
   def canGet(x: Int, y: Int) = (x >= 1 && y >= 1 && x <= sizeX && y <= sizeY)
 
   /**
@@ -39,14 +42,14 @@ case class Board(val intersections: IndexedSeq[IndexedSeq[Option[Color]]], val w
   /**
    * Returns all neighboring intersections for the given position.
    */
-  def neighbors(x: Int, y: Int): Set[Option[Color]] = {
+  def neighbors(x: Int, y: Int): Vector[Option[Color]] = {
 
     // Coordinate differences for neighboring intersections in four directions: left, right, up, down.
-    val neighborCoordDiffs = Set((-1, 0), (1, 0), (0, -1), (0, 1))
+    val neighborCoordDiffs = Vector((-1, 0), (1, 0), (0, -1), (0, 1))
 
     // Filter all legal differences for this position and map them to actual intersections
     neighborCoordDiffs.filter({ case (dx: Int, dy: Int) => canGet(x + dx, y + dy)})
-                      .map   ({ case (dx: Int, dy: Int) => get(x + dx, y + dy)}).toSet
+                      .map   ({ case (dx: Int, dy: Int) =>    get(x + dx, y + dy)})
   }
 
   /**
