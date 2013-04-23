@@ -21,9 +21,9 @@ case class Board(val intersections: IndexedSeq[IndexedSeq[Option[Color]]], val w
   def canGet(x: Int, y: Int) = (x >= 1 && y >= 1 && x <= sizeX && y <= sizeY)
 
   /**
-   * Checks if a stone of the given color can be placed at (x, y).
+   * Checks that it is the right color's turn and that the intersection is empty.
    */
-  def canPlace(c: Color, x: Int, y: Int): Boolean = {
+  def canPlay(c: Color, x: Int, y: Int): Boolean = {
     require(canGet(x, y))
     whoseTurn == c && intersections(y - 1)(x - 1).isEmpty
   }
@@ -61,7 +61,7 @@ case class Board(val intersections: IndexedSeq[IndexedSeq[Option[Color]]], val w
    * If placement is not possible, returns a clone of the current board without ending the turn.
    */
   def play(x: Int, y: Int): Board = {
-    if (!canPlace(whoseTurn, x, y)) {
+    if (!canPlay(whoseTurn, x, y)) {
       new Board(intersections, whoseTurn)
     }
     else {

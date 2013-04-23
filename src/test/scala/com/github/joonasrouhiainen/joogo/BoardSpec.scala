@@ -30,10 +30,10 @@ class BoardSpec extends Specification {
       board.sizeY must_== 7
     }
 
-    "allow placing a black stone at any intersection" in {
+    "allow play a black stone at any intersection" in {
       (1 to board.sizeX) foreach {
         x => (1 to board.sizeY) foreach {
-          y => board.canPlace(Black, x, y) must beTrue
+          y => board.canPlay(Black, x, y) must beTrue
         }
       }
     }
@@ -44,7 +44,7 @@ class BoardSpec extends Specification {
         val pos = "(" + x + ", " + y + ")"
 
         "disallow placing a black stone at " + pos in {
-          board.canPlace(Black, x, y) must throwA [IllegalArgumentException]
+          board.canPlay(Black, x, y) must throwA [IllegalArgumentException]
         }
 
         "disallow getting a stone at " + pos in {
@@ -68,7 +68,7 @@ class BoardSpec extends Specification {
 
   }
 
-  "Placing the first stone on an empty board" should {
+  "Playing the first stone on an empty board" should {
 
     val emptyBoard = new Board(9, 7)
     val board      = emptyBoard.play(1, 2)
@@ -95,6 +95,18 @@ class BoardSpec extends Specification {
     "make it white's turn" in {
       board.whoseTurn must_== White
     }
+
+    "make neighbor at (1,1) have exactly one neighbor" in {
+      board.neighbors(1, 1).count(_.isDefined) must_== 1
+    }
+
+    "make neighbor at (1,1) have a black neighbor" in {
+      board.neighbors(1,1).find(_.isDefined).get.get must_== Black
+    }
+
+    //"make all neighbors have exactly one black neighbor" in {
+      // board.neighbors(1,1) == board.neighbors(2,2) == board.neighbors(1,3)
+    //}
 
   }
 
