@@ -4,6 +4,8 @@ import org.specs2.mutable._
 
 class BoardSpec extends Specification {
 
+  val illegalCoords = Set((0, 0), (-1, -1), (99, 99))
+
   "A new 0x0 board" should {
 
     "be disallowed" in {
@@ -36,12 +38,20 @@ class BoardSpec extends Specification {
       }
     }
 
-    "disallow placing a black stone at (0,0)" in {
-      board.canPlace(Black, 0, 0) must throwA [IllegalArgumentException]
-    }
+    illegalCoords.foreach{
+      case (x: Int, y: Int) => {
 
-    "disallow getting a stone at (0,0)" in {
-      board.get(0, 0) must throwA [IllegalArgumentException]
+        val pos = "(" + x + ", " + y + ")"
+
+        "disallow placing a black stone at " + pos in {
+          board.canPlace(Black, x, y) must throwA [IllegalArgumentException]
+        }
+
+        "disallow getting a stone at " + pos in {
+          board.get(x, y) must throwA [IllegalArgumentException]
+        }
+
+      }
     }
 
     "have black next in turn" in {
