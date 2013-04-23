@@ -37,6 +37,24 @@ case class Board(val intersections: IndexedSeq[IndexedSeq[Option[Color]]], val w
   }
 
   /**
+   * Returns all neighboring intersections for the given position.
+   */
+  def neighbors(x: Int, y: Int): Set[Option[Color]] = {
+
+    val neighborCoordsForPredicates = Map[Boolean, (Int, Int)](
+      (x > 1    ) -> (-1,  0),
+      (x < sizeX) -> ( 1,  0),
+      (y > 1    ) -> ( 0, -1),
+      (y < sizeY) -> ( 0,  1)
+    )
+
+    neighborCoordsForPredicates.filterKeys(_ == true).values.map{
+      case (dx: Int, dy: Int) => get(x + dx, y + dy)
+    }.toSet
+
+  }
+
+  /**
    * If placement is possible, returns a clone of the board with a new stone at given position and with the other player in turn.
    * If placement is not possible, returns a clone of the current board without ending the turn.
    */

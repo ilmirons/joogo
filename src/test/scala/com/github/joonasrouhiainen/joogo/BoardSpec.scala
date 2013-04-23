@@ -54,6 +54,14 @@ class BoardSpec extends Specification {
       }
     }
 
+    "have only empty neighbors for every intersection" in {
+      (1 to board.sizeX) foreach {
+        x => (1 to board.sizeY) foreach {
+          y => board.neighbors(x, y).foreach(_.isEmpty must beTrue)
+        }
+      }
+    }
+
     "have black next in turn" in {
       board.whoseTurn must_== Black
     }
