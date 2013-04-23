@@ -40,6 +40,10 @@ class BoardSpec extends Specification {
       board.canPlace(Black, 0, 0) must throwA [IllegalArgumentException]
     }
 
+    "disallow getting a stone at (0,0)" in {
+      board.get(0, 0) must throwA [IllegalArgumentException]
+    }
+
     "have black next in turn" in {
       board.whoseTurn must_== Black
     }

@@ -18,19 +18,23 @@ case class Board(val intersections: IndexedSeq[IndexedSeq[Option[Color]]], val w
     this(Board.emptyIntersections(sizeX, sizeY), Black)
   }
 
+  def canGet(x: Int, y: Int) = (x >= 1 && y >= 1 && x <= sizeX && y <= sizeY)
+
   /**
    * Checks if a stone of the given color can be placed at (x, y).
    */
   def canPlace(c: Color, x: Int, y: Int): Boolean = {
-    require(x >= 1 && y >= 1 && x <= sizeX && y <= sizeY)
-
+    require(canGet(x, y))
     whoseTurn == c && intersections(y - 1)(x - 1).isEmpty
   }
 
   /**
    * Gets the stone at given position.
    */
-  def get(x: Int, y: Int): Option[Color] = intersections(y - 1)(x - 1)
+  def get(x: Int, y: Int): Option[Color] = {
+    require(canGet(x, y))
+    intersections(y - 1)(x - 1)
+  }
 
   /**
    * If placement is possible, returns a clone of the board with a new stone at given position and with the other player in turn.
