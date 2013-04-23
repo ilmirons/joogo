@@ -14,4 +14,12 @@ class MainServletSpec extends MutableScalatraSpec {
     }
   }
 
+  "POST / on MainServlet" should {
+    "return status 200" in {
+      post("/") {
+        status must_== 200
+      }
+    }
+  }
+
 }
