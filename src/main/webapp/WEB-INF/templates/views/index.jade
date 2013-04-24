@@ -9,7 +9,8 @@ p Board
 pre
 	= board
 
-p ={ "It's " + board.whoseTurn + "'s turn." }
+p = "It's " + board.whoseTurn + "'s turn."
+p = "Captured stones: " + board.capturesForColors
 
 form(action="/" method="POST")
 	input#x(name="x")
