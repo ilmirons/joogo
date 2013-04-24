@@ -8,20 +8,27 @@ class MainServlet extends JoogoStack with ScalateSupport {
 
   var board = new Board(9)
 
-  get("/") {
+  def serveBoard() = {
     contentType = "text/html"
     jade("index", "board" -> board)
   }
 
-  post("/") {
-    contentType = "text/html"
+  get("/") {
+    serveBoard()
+  }
 
+  post("/") {
     if (params.get("x").isDefined && params.get("y").isDefined) {
       val x = params.get("x").get.toInt
       val y = params.get("y").get.toInt
       board = board.play(x, y)
     }
-    jade("index", "board" -> board)
+    serveBoard()
+  }
+
+  post("/pass") {
+    board = board.endTurn
+    serveBoard()
   }
   
 }

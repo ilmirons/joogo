@@ -12,7 +12,10 @@ pre
 p = "It's " + board.whoseTurn + "'s turn."
 p = "Captured stones: " + board.capturesForColors
 
+form(action="/pass" method="POST")
+	button(type="submit") Pass turn
+
 form(action="/" method="POST")
 	input#x(name="x")
 	input#y(name="y")
-	button(type="submit") Make a move!
+	button(type="submit") Make a move!)
