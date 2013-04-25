@@ -30,5 +30,14 @@ class MainServlet extends JoogoStack with ScalateSupport {
     board = board.endTurn
     serveBoard()
   }
+
+  post("/new") {
+    if (params.get("x").isDefined && params.get("y").isDefined) {
+      val x = params.get("x").get.toInt
+      val y = params.get("y").get.toInt
+      board = new Board(x, y)
+    }
+    serveBoard()
+  }
   
 }
