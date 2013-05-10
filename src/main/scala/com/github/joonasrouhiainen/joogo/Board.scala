@@ -1,7 +1,6 @@
 package com.github.joonasrouhiainen.joogo
 
 import scala._
-import scala.Some
 
 /**
  * Represents a rectangular go board with a minimum size of 1x1.
@@ -10,7 +9,7 @@ import scala.Some
  */
 case class Board(val intersections:     IndexedSeq[IndexedSeq[Option[Color]]],
                  val capturesForColors: Map[Color, Int],
-                 val whoseTurn: Color) {
+                 val whoseTurn:         Color) {
 
   val width  = intersections(0) length
   val height = intersections length
@@ -64,19 +63,26 @@ case class Board(val intersections:     IndexedSeq[IndexedSeq[Option[Color]]],
     intersections(y - 1)(x - 1)
   }
 
-  def liberties(x: Int, y: Int): Int = neighbors(x, y).count(_.isEmpty)
+  def liberties(x: Int, y: Int): Int = neighbors(x, y) count (_ isEmpty)
 
   /**
-   * Returns all neighboring intersections for the given position.
+   * Returns the coordinates for all neighbor intersections for the given position.
+   */
+  def neighborCoords(x: Int, y: Int): Vector[(Int, Int)] = {
+    Vector((-1, 0), (1, 0), (0, -1), (0, 1)) // Coordinate differences for neighboring intersections in four directions: left, right, up, down.
+      .map   ({ case (dx: Int, dy: Int) => (x + dx, y + dy) }) // Map to actual coordinates
+      .filter({ case (x:  Int, y:  Int) => canGet(x, y)     }) // Filter valid coordinates
+  }
+
+  def neighborStoneCoords(x: Int, y: Int, c: Color): Vector[(Int, Int)] = {
+    neighborCoords(x, y).filter({ case (x: Int, y: Int) => get(x, y).isDefined && get(x, y).get == c })
+  }
+
+  /**
+   * Returns all neighboring stones and possible empty intersections for the given position.
    */
   def neighbors(x: Int, y: Int): Vector[Option[Color]] = {
-
-    // Coordinate differences for neighboring intersections in four directions: left, right, up, down.
-    val neighborCoordDiffs = Vector((-1, 0), (1, 0), (0, -1), (0, 1))
-
-    // Filter all legal differences for this position and map them to actual intersections
-    neighborCoordDiffs.filter({ case (dx: Int, dy: Int) => canGet(x + dx, y + dy)})
-                      .map   ({ case (dx: Int, dy: Int) =>    get(x + dx, y + dy)})
+    neighborCoords(x, y).map({ case (x: Int, y: Int) => get(x, y) })
   }
 
   /**
@@ -88,7 +94,7 @@ case class Board(val intersections:     IndexedSeq[IndexedSeq[Option[Color]]],
       new Board(intersections, capturesForColors, whoseTurn)
     }
     else {
-      replace(Some(whoseTurn), x, y).removeCaptured.endTurn
+      replace(Some(whoseTurn), x, y).removeCaptured.removeCapturedGroups.endTurn
     }
   }
 
@@ -96,15 +102,15 @@ case class Board(val intersections:     IndexedSeq[IndexedSeq[Option[Color]]],
     var operatedBoard = new Board(intersections, capturesForColors, whoseTurn)
     var capturedCount = 0
 
-    (1 to width).foreach {
-      x => (1 to height).foreach {
+    (1 to width) foreach {
+      x => (1 to height) foreach {
         y => {
           val pos = get(x, y)
 
           if (pos isDefined) {
-            val neighboring: Vector[Option[Color]] = neighbors(x, y)
+            val neighboring: Vector[Option[Color]] = neighbors(x, y).filter(_ isDefined)
 
-            if (neighboring.forall(_.isDefined) && neighboring.forall(_.get == whoseTurn)) {
+            if (neighboring.size == neighbors(x, y).size && neighboring.forall(_.get == whoseTurn)) {
               operatedBoard = replace(None, x, y)
               capturedCount += 1
             }
@@ -113,6 +119,67 @@ case class Board(val intersections:     IndexedSeq[IndexedSeq[Option[Color]]],
       }
     }
     operatedBoard.addCaptureForColor(whoseTurn, capturedCount)
+  }
+
+  private def groupGraph(c: Color): Map[(Int, Int), Set[(Int, Int)]] = {
+    var boardGraph = Map[(Int, Int), Set[(Int, Int)]]()
+
+    (1 to width) foreach {
+      x => (1 to height) foreach {
+        y => {
+          if (get(x, y).isDefined && get(x, y).get == c) {
+            boardGraph = boardGraph + ((x, y) -> neighborStoneCoords(x, y, c).toSet)
+          }
+        }
+      }
+    }
+    boardGraph
+  }
+
+  private def removeCapturedGroups(): Board = {
+    var operatedBoard = new Board(intersections, capturesForColors, whoseTurn)
+    var capturedCount = 0
+
+    def traverse(graph: Map[(Int, Int), Set[(Int, Int)]], toVisit: Seq[(Int, Int)], visited: Set[(Int, Int)], previousGroupMembersWithZeroLiberties: Set[(Int, Int)]): Seq[(Int, Int)] = {
+      if (toVisit isEmpty) {
+        println("no more intersections to visit")
+
+        if (previousGroupMembersWithZeroLiberties nonEmpty) {
+          println("have to remove stones")
+          (previousGroupMembersWithZeroLiberties) foreach {
+            case (x: Int, y: Int) => { operatedBoard = operatedBoard.replace(None, x, y) }
+          }
+        }
+        Seq empty
+      }
+      else {
+        val currentCoords = toVisit.head
+        println("now at " + currentCoords + ", liberties " + liberties(toVisit.head._1, toVisit.head._2) + ", previousGroupMembersWithZeroLiberties " + previousGroupMembersWithZeroLiberties)
+
+        val x = toVisit.head._1
+        val y = toVisit.head._2
+
+        val unvisitedNeighbors = (graph(currentCoords) -- visited -- toVisit).toSeq
+        println("it has unvisited neighbors " + unvisitedNeighbors)
+
+        val zeroesForNext: Set[(Int, Int)] = liberties(x, y) match {
+          case 0 => previousGroupMembersWithZeroLiberties + currentCoords
+          case _ => if (unvisitedNeighbors isEmpty) Set.empty else previousGroupMembersWithZeroLiberties
+        }
+
+        currentCoords +: traverse(graph, toVisit.tail ++ unvisitedNeighbors, visited + currentCoords, zeroesForNext)
+      }
+    }
+
+    def traverseFrom(graph: Map[(Int, Int), Set[(Int, Int)]], initial: (Int, Int)) = traverse(graph, Seq(initial), Set.empty, Set.empty)
+
+    val whiteGraph = groupGraph(White)
+
+    if (whiteGraph nonEmpty) {
+      println("traversing graph from " + whiteGraph.keySet.head)
+      traverseFrom(whiteGraph, whiteGraph.keySet.head)
+    }
+    operatedBoard
   }
 
   /**

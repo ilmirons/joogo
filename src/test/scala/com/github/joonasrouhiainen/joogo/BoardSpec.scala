@@ -158,11 +158,11 @@ class BoardSpec extends Specification {
         val pos = "(" + x + ", " + y + ")"
 
         "make neighbor at " + pos + " have exactly one neighbor" in {
-          board.neighbors(x, y).count(_.isDefined) must_== 1
+          board.neighbors(x, y).count(_ isDefined) must_== 1
         }
 
         "make neighbor at " + pos + " have a black neighbor" in {
-          board.neighbors(x, y).find(_.isDefined).get.get must_== Black
+          board.neighbors(x, y).find(_ isDefined).get.get must_== Black
         }
       }
     }
@@ -174,13 +174,13 @@ class BoardSpec extends Specification {
 
     "make it disappear from the board string" in {
       board.toString must_==
-        "+w+++++++\n" +
-          "w++++++++\n" +
-          "+++++++++\n" +
-          "+++++++++\n" +
-          "+++++++++\n" +
-          "+++++++++\n" +
-          "+++++++++\n"
+      "+w+++++++\n" +
+      "w++++++++\n" +
+      "+++++++++\n" +
+      "+++++++++\n" +
+      "+++++++++\n" +
+      "+++++++++\n" +
+      "+++++++++\n"
     }
 
     "make it unretrievable from the position" in {
@@ -198,13 +198,13 @@ class BoardSpec extends Specification {
 
     "make it disappear from the board string" in {
       board.toString must_==
-        "+++++++++\n" +
-          "+++++++++\n" +
-          "++++b++++\n" +
-          "+++b+b+++\n" +
-          "++++b++++\n" +
-          "+++++++++\n" +
-          "+++++++++\n"
+      "+++++++++\n" +
+      "+++++++++\n" +
+      "++++b++++\n" +
+      "+++b+b+++\n" +
+      "++++b++++\n" +
+      "+++++++++\n" +
+      "+++++++++\n"
     }
 
     "make it unretrievable from the position" in {
@@ -215,7 +215,7 @@ class BoardSpec extends Specification {
 
   "A board with a lonely black diamond where white tries to play inside the diamond" should {
 
-    val board = new Board(9, 7).play(5, 3).endTurn.play(5, 5).endTurn.play(4, 4).endTurn.play(6, 4).play(5, 4)
+    val board = new Board(9, 7).play(5, 3).endTurn.play(5, 5).endTurn.play(4, 4).endTurn.play(6, 4).endTurn.play(5, 4)
 
     "not add white stones to the board string" in {
       board.toString must not contain White
@@ -227,6 +227,24 @@ class BoardSpec extends Specification {
 
     "keep white still in turn" in {
       board.whoseTurn must_== White
+    }
+
+  }
+
+  "Taking the last liberty from a white two-stone group" should {
+
+    val board = new Board(9, 7).play(3, 4).play(4, 4).play(4, 3).play(5, 4).play(5,3).endTurn.play(6, 4).endTurn.play(4, 5).endTurn.play(5,5)
+
+    "make it disappear from the board string" in {
+
+      board.toString must_==
+      "+++++++++\n" +
+      "+++++++++\n" +
+      "+++bb++++\n" +
+      "++b++b+++\n" +
+      "+++bb++++\n" +
+      "+++++++++\n" +
+      "+++++++++\n"
     }
 
   }
