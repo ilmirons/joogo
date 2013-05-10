@@ -221,16 +221,24 @@ class BoardSpec extends Specification {
 
     val board = new Board(9, 7).play(5, 3).endTurn.play(5, 5).endTurn.play(4, 4).endTurn.play(6, 4).play(5, 4)
 
+    "keep white still in turn" in {
+      board.whoseTurn must_== White
+    }
+
+    "disallow playing a white stone inside the diamond eye" in {
+      board.canPlay(White, 5, 4) must beFalse
+    }
+
+    "allow playing a black stone inside the diamond eye" in {
+      board.endTurn.canPlay(Black, 5, 4) must beTrue
+    }
+
     "not add white stones to the board string" in {
       board.toString must not contain White
     }
 
     "keep the diamond eye empty" in {
       board.get(5, 4).isEmpty must beTrue
-    }
-
-    "keep white still in turn" in {
-      board.whoseTurn must_== White
     }
 
   }
@@ -258,6 +266,25 @@ class BoardSpec extends Specification {
 
     "make black player's captured count 2" in {
       board.capturesForColors(Black) must_== 2
+    }
+
+  }
+
+  "Filling a 3x3 board with a black one-eyed group" should {
+
+    val board = new Board(3, 3).play(1, 1).endTurn.play(2, 1).endTurn.play(3, 1).endTurn
+                               .play(1, 2).endTurn.play(2, 2).endTurn.play(3, 2).endTurn
+                               .play(1, 3).endTurn.play(2, 3)
+
+    "allow playing a white stone inside the eye" in {
+      board.canPlay(White, 3, 3) must beTrue
+    }
+
+    "update the board string accordingly after capture" in {
+      board.play(3, 3).toString must_==
+      "+++\n" +
+      "+++\n" +
+      "++w\n"
     }
 
   }

@@ -37,7 +37,7 @@ case class Board(val intersections:     IndexedSeq[IndexedSeq[Option[Color]]],
   /**
    * Checks whether the coordinates are legal.
    */
-  def canGet(x: Int, y: Int) = (x >= 1 && y >= 1 && x <= width && y <= height)
+  def canGet(x: Int, y: Int): Boolean = (x >= 1 && y >= 1 && x <= width && y <= height)
 
   /**
    * Checks that it is the right color's turn and that the intersection is empty.
@@ -49,8 +49,8 @@ case class Board(val intersections:     IndexedSeq[IndexedSeq[Option[Color]]],
     whoseTurn == c &&
     // The intersection must be empty.
     intersections(y - 1)(x - 1).isEmpty &&
-    // The intersection can't have zero liberties and be surrounded by opponent's stones.
-    !(liberties(x, y) == 0 && neighbors(x, y).forall(_.get == whoseTurn.invert))
+    // The intersection either has some liberties or all neighbors have the same color or playing there captures something.
+    (liberties(x, y) > 0 || neighbors(x, y).forall(_.get == whoseTurn) || wouldCapture(c, x, y))
   }
 
   def endTurn(): Board = new Board(intersections, capturesForColors, whoseTurn invert)
@@ -172,6 +172,13 @@ case class Board(val intersections:     IndexedSeq[IndexedSeq[Option[Color]]],
     val newRow = intersections(y - 1)
     val newIntersections = intersections.updated(y - 1, newRow.updated(x - 1, intersection))
     new Board(newIntersections, capturesForColors, whoseTurn)
+  }
+
+  /**
+   * Returns true if playing the given color to the position would result in a capture.
+   */
+  private def wouldCapture(c: Color, x: Int, y: Int): Boolean = {
+    (replace(Some(c), x, y).intersections != replace(Some(c), x, y).removeCapturedGroups(c invert).intersections)
   }
 
   override def toString(): String = {
