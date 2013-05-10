@@ -219,7 +219,7 @@ class BoardSpec extends Specification {
 
   "A board with a lonely black diamond where white tries to play inside the diamond" should {
 
-    val board = new Board(9, 7).play(5, 3).endTurn.play(5, 5).endTurn.play(4, 4).endTurn.play(6, 4).endTurn.play(5, 4)
+    val board = new Board(9, 7).play(5, 3).endTurn.play(5, 5).endTurn.play(4, 4).endTurn.play(6, 4).play(5, 4)
 
     "not add white stones to the board string" in {
       board.toString must not contain White

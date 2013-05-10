@@ -56,7 +56,7 @@ case class Board(val intersections:     IndexedSeq[IndexedSeq[Option[Color]]],
   def endTurn(): Board = new Board(intersections, capturesForColors, whoseTurn invert)
 
   /**
-   * Gets the stone at given position.
+   * Gets the intersection at the given position.
    */
   def get(x: Int, y: Int): Option[Color] = {
     require(canGet(x, y))
@@ -66,20 +66,23 @@ case class Board(val intersections:     IndexedSeq[IndexedSeq[Option[Color]]],
   def liberties(x: Int, y: Int): Int = neighbors(x, y) count (_ isEmpty)
 
   /**
-   * Returns the coordinates for all neighbor intersections for the given position.
+   * Returns the coordinates for all neighbor intersections of the given position.
    */
   def neighborCoords(x: Int, y: Int): Vector[(Int, Int)] = {
     Vector((-1, 0), (1, 0), (0, -1), (0, 1)) // Coordinate differences for neighboring intersections in four directions: left, right, up, down.
-      .map   ({ case (dx: Int, dy: Int) => (x + dx, y + dy) }) // Map to actual coordinates
-      .filter({ case (x:  Int, y:  Int) => canGet(x, y)     }) // Filter valid coordinates
+      .map   { case (dx: Int, dy: Int) => (x + dx, y + dy) } // Map to actual coordinates
+      .filter{ case (x:  Int, y:  Int) => canGet(x, y)     } // Filter valid coordinates
   }
 
+  /**
+   * Returns the coordinates for all neighbor stones of the given position with the given color.
+   */
   def neighborStoneCoords(x: Int, y: Int, c: Color): Vector[(Int, Int)] = {
     neighborCoords(x, y) filter { case (x: Int, y: Int) => get(x, y).isDefined && get(x, y).get == c }
   }
 
   /**
-   * Returns all neighboring stones and possible empty intersections for the given position.
+   * Returns all neighboring intersections for the given position – may contain empty intersections.
    */
   def neighbors(x: Int, y: Int): Vector[Option[Color]] = {
     neighborCoords(x, y) map { case (x: Int, y: Int) => get(x, y) }
@@ -94,31 +97,8 @@ case class Board(val intersections:     IndexedSeq[IndexedSeq[Option[Color]]],
       new Board(intersections, capturesForColors, whoseTurn)
     }
     else {
-      replace(Some(whoseTurn), x, y).removeCaptured.removeCapturedGroups.endTurn
+      replace(Some(whoseTurn), x, y).removeCapturedGroups(whoseTurn invert).endTurn
     }
-  }
-
-  private def removeCaptured(): Board = {
-    var operatedBoard = new Board(intersections, capturesForColors, whoseTurn)
-    var capturedCount = 0
-
-    (1 to width) foreach {
-      x => (1 to height) foreach {
-        y => {
-          val pos = get(x, y)
-
-          if (pos isDefined) {
-            val neighboring: Vector[Option[Color]] = neighbors(x, y).filter(_ isDefined)
-
-            if (neighboring.size == neighbors(x, y).size && neighboring.forall(_.get == whoseTurn)) {
-              operatedBoard = replace(None, x, y)
-              capturedCount += 1
-            }
-          }
-        }
-      }
-    }
-    operatedBoard.addCaptureForColor(whoseTurn, capturedCount)
   }
 
   private def groupGraph(c: Color): Map[(Int, Int), Set[(Int, Int)]] = {
@@ -136,7 +116,7 @@ case class Board(val intersections:     IndexedSeq[IndexedSeq[Option[Color]]],
     boardGraph
   }
 
-  private def removeCapturedGroups(): Board = {
+  private def removeCapturedGroups(c: Color): Board = {
     var operatedBoard = new Board(intersections, capturesForColors, whoseTurn)
     var capturedCount = 0
 
@@ -176,17 +156,17 @@ case class Board(val intersections:     IndexedSeq[IndexedSeq[Option[Color]]],
 
     def traverseFrom(graph: Map[(Int, Int), Set[(Int, Int)]], initial: (Int, Int)) = traverse(graph, Seq(initial), Set.empty, Set.empty)
 
-    val whiteGraph = groupGraph(White)
+    val graph = groupGraph(c)
 
-    if (whiteGraph nonEmpty) {
-      println("traversing graph from " + whiteGraph.keySet.head)
-      traverseFrom(whiteGraph, whiteGraph.keySet.head)
+    if (graph nonEmpty) {
+      println("traversing graph from " + graph.keySet.head)
+      traverseFrom(graph, graph.keySet.head)
     }
     operatedBoard.addCaptureForColor(whoseTurn, capturedCount)
   }
 
   /**
-   * Replaces or removes a stone at given position without ending the turn.
+   * Replaces or removes a stone at the given position without ending the turn.
    */
   private def replace(intersection: Option[Color], x: Int, y: Int): Board = {
     val newRow = intersections(y - 1)
@@ -197,7 +177,7 @@ case class Board(val intersections:     IndexedSeq[IndexedSeq[Option[Color]]],
   override def toString(): String = {
     intersections.foldLeft("") {
       (boardString, row) => boardString + row.foldLeft("") {
-        (rowString, intersection) => rowString + (if (intersection isEmpty) "+" else intersection.get)
+        (rowString, intersection) => rowString + (if (intersection isEmpty) "+" else intersection get)
       } + "\n"
     }
   }
