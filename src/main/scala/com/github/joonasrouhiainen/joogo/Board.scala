@@ -75,14 +75,14 @@ case class Board(val intersections:     IndexedSeq[IndexedSeq[Option[Color]]],
   }
 
   def neighborStoneCoords(x: Int, y: Int, c: Color): Vector[(Int, Int)] = {
-    neighborCoords(x, y).filter({ case (x: Int, y: Int) => get(x, y).isDefined && get(x, y).get == c })
+    neighborCoords(x, y) filter { case (x: Int, y: Int) => get(x, y).isDefined && get(x, y).get == c }
   }
 
   /**
    * Returns all neighboring stones and possible empty intersections for the given position.
    */
   def neighbors(x: Int, y: Int): Vector[Option[Color]] = {
-    neighborCoords(x, y).map({ case (x: Int, y: Int) => get(x, y) })
+    neighborCoords(x, y) map { case (x: Int, y: Int) => get(x, y) }
   }
 
   /**
@@ -147,7 +147,10 @@ case class Board(val intersections:     IndexedSeq[IndexedSeq[Option[Color]]],
         if (previousGroupMembersWithZeroLiberties nonEmpty) {
           println("have to remove stones")
           (previousGroupMembersWithZeroLiberties) foreach {
-            case (x: Int, y: Int) => { operatedBoard = operatedBoard.replace(None, x, y) }
+            case (x: Int, y: Int) => {
+              operatedBoard = operatedBoard.replace(None, x, y)
+              capturedCount += 1
+            }
           }
         }
         Seq empty
@@ -179,7 +182,7 @@ case class Board(val intersections:     IndexedSeq[IndexedSeq[Option[Color]]],
       println("traversing graph from " + whiteGraph.keySet.head)
       traverseFrom(whiteGraph, whiteGraph.keySet.head)
     }
-    operatedBoard
+    operatedBoard.addCaptureForColor(whoseTurn, capturedCount)
   }
 
   /**

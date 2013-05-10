@@ -211,6 +211,10 @@ class BoardSpec extends Specification {
       board.get(5, 4).isEmpty must beTrue
     }
 
+    "make black player's captured count 1" in {
+      board.capturesForColors(Black) must_== 1
+    }
+
   }
 
   "A board with a lonely black diamond where white tries to play inside the diamond" should {
@@ -245,6 +249,15 @@ class BoardSpec extends Specification {
       "+++bb++++\n" +
       "+++++++++\n" +
       "+++++++++\n"
+    }
+
+    "make it unretrievable from the position" in {
+      board.get(4, 4).isEmpty must beTrue
+      board.get(5, 4).isEmpty must beTrue
+    }
+
+    "make black player's captured count 2" in {
+      board.capturesForColors(Black) must_== 2
     }
 
   }
