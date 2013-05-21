@@ -287,6 +287,23 @@ class BoardSpec extends Specification {
       "++w\n"
     }
 
+    "make white player's captured count equal board size - 1 after capture" in {
+      board.play(3, 3).capturesForColors(White) must_== board.width * board.height - 1
+    }
+
+  }
+
+  "Taking the last liberty from a single stone whose group still has liberties" should {
+
+    val board = new Board(3, 3).play(1, 1).play(2, 2).play(1, 2).play(1, 3)
+
+    "keep the group in the board string" in {
+      board.toString must_==
+      "b++\n" +
+      "bw+\n" +
+      "w++\n"
+    }
+
   }
 
 }

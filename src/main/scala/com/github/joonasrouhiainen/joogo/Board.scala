@@ -63,7 +63,8 @@ case class Board(val intersections:     IndexedSeq[IndexedSeq[Option[Color]]],
     intersections(y - 1)(x - 1)
   }
 
-  def liberties(x: Int, y: Int): Int = neighbors(x, y) count (_ isEmpty)
+  def liberties(coords: (Int, Int)): Int = liberties(coords._1, coords._2)
+  def liberties(x: Int, y: Int):     Int = neighbors(x, y) count (_ isEmpty)
 
   /**
    * Returns the coordinates for all neighbor intersections of the given position.
@@ -101,6 +102,9 @@ case class Board(val intersections:     IndexedSeq[IndexedSeq[Option[Color]]],
     }
   }
 
+  /**
+   * Returns a group graph (intersections as keys, neighbors as values) for the given color.
+   */
   private def groupGraph(c: Color): Map[(Int, Int), Set[(Int, Int)]] = {
     var boardGraph = Map[(Int, Int), Set[(Int, Int)]]()
 
@@ -116,51 +120,39 @@ case class Board(val intersections:     IndexedSeq[IndexedSeq[Option[Color]]],
     boardGraph
   }
 
+  /**
+   * Removes all captured groups of the given color.
+   */
   private def removeCapturedGroups(c: Color): Board = {
+    val graph         = groupGraph(c)
     var operatedBoard = new Board(intersections, capturesForColors, whoseTurn)
     var capturedCount = 0
 
-    def traverse(graph: Map[(Int, Int), Set[(Int, Int)]], toVisit: Seq[(Int, Int)], visited: Set[(Int, Int)], previousGroupMembersWithZeroLiberties: Set[(Int, Int)]): Seq[(Int, Int)] = {
-      if (toVisit isEmpty) {
-        println("no more intersections to visit")
+    // Recursive BFS
+    def traverse(graph: Map[(Int, Int), Set[(Int, Int)]], toVisit: Seq[(Int, Int)], visited: Set[(Int, Int)], groupMembers: Set[(Int, Int)]): Seq[(Int, Int)] = {
 
-        if (previousGroupMembersWithZeroLiberties nonEmpty) {
-          println("have to remove stones")
-          (previousGroupMembersWithZeroLiberties) foreach {
+      if (toVisit nonEmpty) {
+        val currentCoords = toVisit.head
+        val unvisitedNeighbors = (graph(currentCoords) -- visited -- toVisit).toSeq
+        currentCoords +: traverse(graph, toVisit.tail ++ unvisitedNeighbors, visited + currentCoords, groupMembers + currentCoords)
+      }
+      else {
+        // When all intersections of a group have been visited
+        if (groupMembers.nonEmpty && groupMembers.forall(liberties(_) == 0)) {
+          // If all members have zero liberties, remove the group's stones
+          (groupMembers) foreach {
             case (x: Int, y: Int) => {
               operatedBoard = operatedBoard.replace(None, x, y)
               capturedCount += 1
             }
           }
         }
-        Seq empty
-      }
-      else {
-        val currentCoords = toVisit.head
-        println("now at " + currentCoords + ", liberties " + liberties(toVisit.head._1, toVisit.head._2) + ", previousGroupMembersWithZeroLiberties " + previousGroupMembersWithZeroLiberties)
-
-        val x = toVisit.head._1
-        val y = toVisit.head._2
-
-        val unvisitedNeighbors = (graph(currentCoords) -- visited -- toVisit).toSeq
-        println("it has unvisited neighbors " + unvisitedNeighbors)
-
-        val zeroesForNext: Set[(Int, Int)] = liberties(x, y) match {
-          case 0 => previousGroupMembersWithZeroLiberties + currentCoords
-          case _ => if (unvisitedNeighbors isEmpty) Set.empty else previousGroupMembersWithZeroLiberties
-        }
-
-        currentCoords +: traverse(graph, toVisit.tail ++ unvisitedNeighbors, visited + currentCoords, zeroesForNext)
+        Seq empty // end traversal
       }
     }
-
-    def traverseFrom(graph: Map[(Int, Int), Set[(Int, Int)]], initial: (Int, Int)) = traverse(graph, Seq(initial), Set.empty, Set.empty)
-
-    val graph = groupGraph(c)
-
     if (graph nonEmpty) {
-      println("traversing graph from " + graph.keySet.head)
-      traverseFrom(graph, graph.keySet.head)
+      // Traverse from first stone in key set.
+      traverse(graph, Seq(graph.keySet.head), Set.empty, Set.empty)
     }
     operatedBoard.addCaptureForColor(whoseTurn, capturedCount)
   }
