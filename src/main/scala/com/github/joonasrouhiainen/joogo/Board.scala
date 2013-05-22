@@ -35,10 +35,7 @@ case class Board(intersections:     Seq[Seq[Option[Color]]],
   }
 
   private def addCaptureForColor(c: Color, capture: Int): Board = {
-    new Board(intersections,
-              capturesForColors + (c -> (capturesForColors(c) + capture)),
-              whoseTurn,
-              koPosition)
+    copy(capturesForColors = capturesForColors + (c -> (capturesForColors(c) + capture)))
   }
 
   /**
@@ -65,7 +62,7 @@ case class Board(intersections:     Seq[Seq[Option[Color]]],
   /**
    * Inverts color in turn and resets ko. Can be used to pass a turn.
    */
-  def endTurn: Board = new Board(intersections, capturesForColors, whoseTurn.invert, None)
+  def endTurn: Board = copy(whoseTurn = whoseTurn.invert, koPosition = None)
 
   /**
    * Gets the intersection at the given position.
@@ -170,7 +167,7 @@ case class Board(intersections:     Seq[Seq[Option[Color]]],
    */
   def play(x: Int, y: Int): Board = {
     if (!canPlay(whoseTurn, x, y)) {
-      new Board(intersections, capturesForColors, whoseTurn, koPosition)
+      copy()
     }
     else {
       // Put the stone in place, remove captured groups and invert turn
@@ -188,7 +185,7 @@ case class Board(intersections:     Seq[Seq[Option[Color]]],
         // If the opponent could play back at the captured position to capture exactly one stone (if ko was not set)
         if (boardForNextTurn.replace(Some(boardForNextTurn.whoseTurn), singleCapturedPosition._1, singleCapturedPosition._2).removeCapturedGroups(boardForNextTurn.whoseTurn).capturesForColors(boardForNextTurn.whoseTurn) == capturesForColors(boardForNextTurn.whoseTurn) + 1) {
           // Mark ko position
-          boardForNextTurn.withKoPosition(singleCapturedPosition)
+          boardForNextTurn.copy(koPosition = Option(singleCapturedPosition))
         }
         else boardForNextTurn
       }
@@ -200,7 +197,7 @@ case class Board(intersections:     Seq[Seq[Option[Color]]],
    * Removes all captured groups of the given color.
    */
   private def removeCapturedGroups(c: Color): Board = {
-    var operatedBoard = new Board(intersections, capturesForColors, whoseTurn, koPosition)
+    var operatedBoard = copy()
     var capturedCount = 0
 
     groups(c).foreach {
@@ -225,7 +222,7 @@ case class Board(intersections:     Seq[Seq[Option[Color]]],
   private def replace(intersection: Option[Color], x: Int, y: Int): Board = {
     val newRow = intersections(y - 1)
     val newIntersections = intersections.updated(y - 1, newRow.updated(x - 1, intersection))
-    new Board(newIntersections, capturesForColors, whoseTurn, koPosition)
+    copy(intersections = newIntersections)
   }
 
   override def toString: String = {
@@ -235,8 +232,6 @@ case class Board(intersections:     Seq[Seq[Option[Color]]],
       } + "\n"
     }
   }
-
-  private def withKoPosition(pos: (Int, Int)) = new Board(intersections, capturesForColors, whoseTurn, Option(pos))
 
   /**
    * Returns true if playing the given color to the position would result in a capture.
