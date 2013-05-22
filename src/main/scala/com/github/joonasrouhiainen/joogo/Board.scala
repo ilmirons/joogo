@@ -10,7 +10,8 @@ import scala.annotation.tailrec
  */
 case class Board(intersections:     Seq[Seq[Option[Color]]],
                  capturesForColors: Map[Color, Int],
-                 whoseTurn:         Color) {
+                 whoseTurn:         Color,
+                 koPosition:        Option[(Int, Int)]) {
 
   val width  = intersections(0).length
   val height = intersections.length
@@ -22,7 +23,8 @@ case class Board(intersections:     Seq[Seq[Option[Color]]],
     this(
       Board.emptyIntersections(sizeX, sizeY),
       Map(Black -> 0, White -> 0),
-      Black)
+      Black,
+      None)
   }
 
   /**
@@ -35,7 +37,8 @@ case class Board(intersections:     Seq[Seq[Option[Color]]],
   private def addCaptureForColor(c: Color, capture: Int): Board = {
     new Board(intersections,
               capturesForColors + (c -> (capturesForColors(c) + capture)),
-              whoseTurn)
+              whoseTurn,
+              koPosition)
   }
 
   /**
@@ -54,10 +57,15 @@ case class Board(intersections:     Seq[Seq[Option[Color]]],
     // The intersection must be empty.
     intersections(y - 1)(x - 1).isEmpty &&
     // The intersection either has some liberties or all neighbors have the same color or playing there captures something.
-    (liberties(x, y) > 0 || neighbors(x, y).forall(_.get == whoseTurn) || wouldCapture(c, x, y))
+    (liberties(x, y) > 0 || neighbors(x, y).forall(_.get == whoseTurn) || wouldCapture(c, x, y)) &&
+    // The intersection is not under ko.
+    !(koPosition.isDefined && koPosition.get == (x, y))
   }
 
-  def endTurn: Board = new Board(intersections, capturesForColors, whoseTurn.invert)
+  /**
+   * Inverts color in turn and resets ko. Can be used to pass a turn.
+   */
+  def endTurn: Board = new Board(intersections, capturesForColors, whoseTurn.invert, None)
 
   /**
    * Gets the intersection at the given position.
@@ -101,8 +109,8 @@ case class Board(intersections:     Seq[Seq[Option[Color]]],
   private def groupGraph(c: Color): Map[(Int, Int), Set[(Int, Int)]] = {
     var boardGraph = Map[(Int, Int), Set[(Int, Int)]]()
 
-    (1 to width) foreach {
-      x => (1 to height) foreach {
+    (1 to width).foreach {
+      x => (1 to height).foreach {
         y => {
           if (get(x, y).isDefined && get(x, y).get == c) {
             boardGraph = boardGraph + ((x, y) -> neighborStoneCoords(x, y, c).toSet)
@@ -116,8 +124,8 @@ case class Board(intersections:     Seq[Seq[Option[Color]]],
   private def groups(c: Color): Set[Set[(Int, Int)]] = {
     var groups = Set[Set[(Int, Int)]]()
 
-    (1 to width) foreach {
-      x => (1 to height) foreach {
+    (1 to width).foreach {
+      x => (1 to height).foreach {
         y => {
           if (get(x, y).isDefined && get(x, y).get == c) {
             groups = groups + groupAt(x, y)
@@ -145,7 +153,7 @@ case class Board(intersections:     Seq[Seq[Option[Color]]],
    */
   def neighbors(x: Int, y: Int): Seq[Option[Color]] = {
     require(canGet(x, y))
-    neighborCoords(x, y) map { case (x: Int, y: Int) => get(x, y) }
+    neighborCoords(x, y).map{ case (x: Int, y: Int) => get(x, y) }
   }
 
   /**
@@ -153,7 +161,7 @@ case class Board(intersections:     Seq[Seq[Option[Color]]],
    */
   def neighborStoneCoords(x: Int, y: Int, c: Color): Seq[(Int, Int)] = {
     require(canGet(x, y))
-    neighborCoords(x, y) filter { case (x: Int, y: Int) => get(x, y).isDefined && get(x, y).get == c }
+    neighborCoords(x, y).filter{ case (x: Int, y: Int) => get(x, y).isDefined && get(x, y).get == c }
   }
 
   /**
@@ -162,10 +170,29 @@ case class Board(intersections:     Seq[Seq[Option[Color]]],
    */
   def play(x: Int, y: Int): Board = {
     if (!canPlay(whoseTurn, x, y)) {
-      new Board(intersections, capturesForColors, whoseTurn)
+      new Board(intersections, capturesForColors, whoseTurn, koPosition)
     }
     else {
-      replace(Some(whoseTurn), x, y).removeCapturedGroups(whoseTurn invert).endTurn
+      // Put the stone in place, remove captured groups and invert turn
+      val boardForNextTurn = replace(Some(whoseTurn), x, y).removeCapturedGroups(whoseTurn invert).endTurn
+
+      // Mark ko position if needed.
+
+      // If the move captures exactly one stone
+      if (boardForNextTurn.capturesForColors(whoseTurn) == capturesForColors(whoseTurn) + 1) {
+
+        // See what will be captured by this move: get the first stone of the intersection of the play coordinates'
+        // neighborhood before and after this move
+        val singleCapturedPosition = neighborStoneCoords(x, y, whoseTurn.invert).diff(boardForNextTurn.neighborStoneCoords(x, y, whoseTurn.invert))(0)
+
+        // If the opponent could play back at the captured position to capture exactly one stone (if ko was not set)
+        if (boardForNextTurn.replace(Some(boardForNextTurn.whoseTurn), singleCapturedPosition._1, singleCapturedPosition._2).removeCapturedGroups(boardForNextTurn.whoseTurn).capturesForColors(boardForNextTurn.whoseTurn) == capturesForColors(boardForNextTurn.whoseTurn) + 1) {
+          // Mark ko position
+          boardForNextTurn.withKoPosition(singleCapturedPosition)
+        }
+        else boardForNextTurn
+      }
+      else boardForNextTurn
     }
   }
 
@@ -173,14 +200,14 @@ case class Board(intersections:     Seq[Seq[Option[Color]]],
    * Removes all captured groups of the given color.
    */
   private def removeCapturedGroups(c: Color): Board = {
-    var operatedBoard = new Board(intersections, capturesForColors, whoseTurn)
+    var operatedBoard = new Board(intersections, capturesForColors, whoseTurn, koPosition)
     var capturedCount = 0
 
     groups(c).foreach {
       group => {
         if (group.nonEmpty && group.forall(liberties(_) == 0)) {
           // If all members have zero liberties, remove the group's stones
-          group foreach {
+          group.foreach {
             case (x: Int, y: Int) => {
               operatedBoard = operatedBoard.replace(None, x, y)
               capturedCount += 1
@@ -198,7 +225,7 @@ case class Board(intersections:     Seq[Seq[Option[Color]]],
   private def replace(intersection: Option[Color], x: Int, y: Int): Board = {
     val newRow = intersections(y - 1)
     val newIntersections = intersections.updated(y - 1, newRow.updated(x - 1, intersection))
-    new Board(newIntersections, capturesForColors, whoseTurn)
+    new Board(newIntersections, capturesForColors, whoseTurn, koPosition)
   }
 
   override def toString: String = {
@@ -208,6 +235,8 @@ case class Board(intersections:     Seq[Seq[Option[Color]]],
       } + "\n"
     }
   }
+
+  private def withKoPosition(pos: (Int, Int)) = new Board(intersections, capturesForColors, whoseTurn, Option(pos))
 
   /**
    * Returns true if playing the given color to the position would result in a capture.

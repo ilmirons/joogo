@@ -319,4 +319,15 @@ class BoardSpec extends Specification {
 
   }
 
+  "White player capturing a ko" should {
+
+    val board = new Board(4, 3).play(2, 1).play(3, 1).play(1, 2).play(4, 2).play(2, 3).play(3, 3).play(3, 2).play(2, 2)
+
+    "disallow playing a black stone that recaptures the ko" in {
+      board.play(3, 2).capturesForColors(Black) must_== 0
+      board.play(3, 2).whoseTurn must_== Black
+    }
+
+  }
+
 }
