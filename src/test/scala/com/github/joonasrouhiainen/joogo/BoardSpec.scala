@@ -306,4 +306,17 @@ class BoardSpec extends Specification {
 
   }
 
+  "Taking the last liberty from a single stone on a board with multiple groups of the same color" should {
+
+    val board = new Board(3, 3).play(1, 1).endTurn.play(3, 1).endTurn.play(1, 3).endTurn.play(3, 3).play(3, 2).endTurn.play(2, 3)
+
+    "update the board string accordingly" in {
+      board.toString must_==
+      "b+b\n" +
+      "++w\n" +
+      "bw+\n"
+    }
+
+  }
+
 }
