@@ -7,7 +7,7 @@ package com.github.joonasrouhiainen.joogo
  */
 sealed trait Color {
 
-  implicit def color2string(c: Color) = c toString
+  implicit def color2string(c: Color) = c.toString
 
   def invert: Color = this match {
     case Black => White

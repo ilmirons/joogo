@@ -8,18 +8,21 @@ import scala.annotation.tailrec
  *
  * @author Joonas Rouhiainen
  */
-case class Board(val intersections:     IndexedSeq[IndexedSeq[Option[Color]]],
-                 val capturesForColors: Map[Color, Int],
-                 val whoseTurn:         Color) {
+case class Board(intersections:     Seq[Seq[Option[Color]]],
+                 capturesForColors: Map[Color, Int],
+                 whoseTurn:         Color) {
 
-  val width  = intersections(0) length
-  val height = intersections length
+  val width  = intersections(0).length
+  val height = intersections.length
 
   /**
    * Constructs an empty rectangular board with the given dimensions.
    */
   def this(sizeX: Int, sizeY: Int) {
-    this(Board.emptyIntersections(sizeX, sizeY), Map(Black -> 0, White -> 0), Black)
+    this(
+      Board.emptyIntersections(sizeX, sizeY),
+      Map(Black -> 0, White -> 0),
+      Black)
   }
 
   /**
@@ -54,7 +57,7 @@ case class Board(val intersections:     IndexedSeq[IndexedSeq[Option[Color]]],
     (liberties(x, y) > 0 || neighbors(x, y).forall(_.get == whoseTurn) || wouldCapture(c, x, y))
   }
 
-  def endTurn(): Board = new Board(intersections, capturesForColors, whoseTurn invert)
+  def endTurn: Board = new Board(intersections, capturesForColors, whoseTurn.invert)
 
   /**
    * Gets the intersection at the given position.
@@ -79,8 +82,8 @@ case class Board(val intersections:     IndexedSeq[IndexedSeq[Option[Color]]],
                    visited:      Set[(Int, Int)],
                    groupMembers: Seq[(Int, Int)]): Seq[(Int, Int)] = {
 
-      if (toVisit nonEmpty) {
-        val currentCoords = toVisit head
+      if (toVisit.nonEmpty) {
+        val currentCoords = toVisit.head
         val unvisitedNeighbors = (graph(currentCoords) -- visited -- toVisit).toSeq
         // Accumulate groupMembers with recursion (recursive call with currentCoords prepended to groupMembers).
         buildGroup(graph, toVisit.tail ++ unvisitedNeighbors, visited + currentCoords, groupMembers :+ currentCoords)
@@ -88,10 +91,10 @@ case class Board(val intersections:     IndexedSeq[IndexedSeq[Option[Color]]],
       else groupMembers
     }
 
-    if (get(x, y) isDefined) {
-      buildGroup(groupGraph(get(x, y) get), Seq((x, y)), Set empty, Seq empty) toSet
+    if (get(x, y).isDefined) {
+      buildGroup(groupGraph(get(x, y).get), Seq((x, y)), Set.empty, Seq.empty).toSet
     }
-    else Set empty
+    else Set.empty
   }
 
 
@@ -131,8 +134,8 @@ case class Board(val intersections:     IndexedSeq[IndexedSeq[Option[Color]]],
   /**
    * Returns the coordinates for all neighbor intersections of the given position.
    */
-  def neighborCoords(x: Int, y: Int): Vector[(Int, Int)] = {
-    Vector((-1, 0), (1, 0), (0, -1), (0, 1)) // Coordinate differences for neighboring intersections in four directions: left, right, up, down.
+  def neighborCoords(x: Int, y: Int): Seq[(Int, Int)] = {
+    Seq((-1, 0), (1, 0), (0, -1), (0, 1)) // Coordinate differences for neighboring intersections in four directions: left, right, up, down.
       .map   { case (dx: Int, dy: Int) => (x + dx, y + dy) } // Map to actual coordinates
       .filter{ case (x:  Int, y:  Int) => canGet(x, y)     } // Filter valid coordinates
   }
@@ -140,14 +143,16 @@ case class Board(val intersections:     IndexedSeq[IndexedSeq[Option[Color]]],
   /**
    * Returns all neighboring intersections for the given position – may contain empty intersections.
    */
-  def neighbors(x: Int, y: Int): Vector[Option[Color]] = {
+  def neighbors(x: Int, y: Int): Seq[Option[Color]] = {
+    require(canGet(x, y))
     neighborCoords(x, y) map { case (x: Int, y: Int) => get(x, y) }
   }
 
   /**
    * Returns the coordinates for all neighbor stones of the given position with the given color.
    */
-  def neighborStoneCoords(x: Int, y: Int, c: Color): Vector[(Int, Int)] = {
+  def neighborStoneCoords(x: Int, y: Int, c: Color): Seq[(Int, Int)] = {
+    require(canGet(x, y))
     neighborCoords(x, y) filter { case (x: Int, y: Int) => get(x, y).isDefined && get(x, y).get == c }
   }
 
@@ -196,10 +201,10 @@ case class Board(val intersections:     IndexedSeq[IndexedSeq[Option[Color]]],
     new Board(newIntersections, capturesForColors, whoseTurn)
   }
 
-  override def toString(): String = {
+  override def toString: String = {
     intersections.foldLeft("") {
       (boardString, row) => boardString + row.foldLeft("") {
-        (rowString, intersection) => rowString + (if (intersection isEmpty) "+" else intersection get)
+        (rowString, intersection) => rowString + (if (intersection.isEmpty) "+" else intersection.get)
       } + "\n"
     }
   }
@@ -215,7 +220,7 @@ case class Board(val intersections:     IndexedSeq[IndexedSeq[Option[Color]]],
 
 object Board {
 
-  def emptyIntersections(width: Int, height: Int): IndexedSeq[IndexedSeq[Option[Color]]] = {
+  def emptyIntersections(width: Int, height: Int): Seq[Seq[Option[Color]]] = {
     require(width > 0 && height > 0)
     Vector.fill(height, width)(None)
   }
