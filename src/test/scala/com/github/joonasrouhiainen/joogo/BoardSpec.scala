@@ -243,6 +243,19 @@ class BoardSpec extends Specification {
 
   }
 
+  "A board with a surrounded white diamond" should {
+
+    val board = new Board(5, 5).play(3, 2).play(3, 1).play(2, 3).play(2, 2).play(3, 4).play(1, 3).play(4, 3).play(2, 4).endTurn.play(3, 5).endTurn.play(4, 4).endTurn.play(5, 3).endTurn.play(4, 2)
+
+    "disallow playing a white stone that takes its own group's last liberty" in {
+      board.canPlay(Black, 3, 3) must beFalse
+      board.play(3, 3).whoseTurn must_== Black
+      board.play(3, 3).capturesForColors(Black) must_== 0
+      board.play(3, 3).capturesForColors(White) must_== 0
+    }
+
+  }
+
   "Taking the last liberty from a white two-stone group" should {
 
     val board = new Board(9, 7).play(3, 4).play(4, 4).play(4, 3).play(5, 4).play(5,3).endTurn.play(6, 4).endTurn.play(4, 5).endTurn.play(5,5)

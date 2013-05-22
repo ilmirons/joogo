@@ -56,8 +56,8 @@ case class Board(intersections:     Seq[Seq[Option[Color]]],
     whoseTurn == c &&
     // The intersection must be empty.
     intersections(y - 1)(x - 1).isEmpty &&
-    // The intersection either has some liberties or all neighbors have the same color or playing there captures something.
-    (liberties(x, y) > 0 || neighbors(x, y).forall(_.get == whoseTurn) || wouldCapture(c, x, y)) &&
+    // The intersection either has some liberties or all neighbors have the same color and it's not the last liberty of the group or playing there captures something.
+    (liberties(x, y) > 0 || neighbors(x, y).forall(_.get == whoseTurn) && !wouldCapture(c.invert, x, y) || wouldCapture(c, x, y)) &&
     // The intersection is not under ko.
     !(koPosition.isDefined && koPosition.get == (x, y))
   }
@@ -242,7 +242,7 @@ case class Board(intersections:     Seq[Seq[Option[Color]]],
    * Returns true if playing the given color to the position would result in a capture.
    */
   private def wouldCapture(c: Color, x: Int, y: Int): Boolean = {
-    (replace(Some(c), x, y).intersections != replace(Some(c), x, y).removeCapturedGroups(c invert).intersections)
+    (replace(Some(c), x, y).intersections != replace(Some(c), x, y).removeCapturedGroups(c.invert).intersections)
   }
 
 }
