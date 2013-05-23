@@ -79,8 +79,24 @@ case class Board(intersections:     Seq[Seq[Option[Color]]],
   /**
    * Returns a group graph (intersections as keys, neighbors as values) for the group at given position.
    */
-  private def groupAt(pos: Coords): Set[Coords] = {
+  def groupAt(pos: Coords): Set[Coords] = {
     require(canGet(pos))
+
+    /**
+     * Builds a graph of all stones of the given color: stone coordinates as keys, neighbor stone coordinates as values.
+     */
+    def stoneGraph(c: Color): Map[Coords, Set[Coords]] = {
+      var boardGraph = Map[Coords, Set[Coords]]()
+
+      allCoords.map {
+        pos => {
+          if (get(pos).isDefined && get(pos).get == c) {
+            boardGraph = boardGraph + (pos -> neighborStoneCoords(pos, c).toSet)
+          }
+        }
+      }
+      boardGraph
+    }
 
     /**
      * Accumulates group members with breadth-first search.
@@ -101,26 +117,15 @@ case class Board(intersections:     Seq[Seq[Option[Color]]],
     }
 
     if (get(pos).isDefined) {
-      buildGroup(groupGraph(get(pos).get), Seq(pos), Set.empty, Seq.empty).toSet
+      buildGroup(stoneGraph(get(pos).get), Seq(pos), Set.empty, Seq.empty).toSet
     }
     else Set.empty
   }
 
-
-  private def groupGraph(c: Color): Map[Coords, Set[Coords]] = {
-    var boardGraph = Map[Coords, Set[Coords]]()
-
-    allCoords.map {
-      pos => {
-        if (get(pos).isDefined && get(pos).get == c) {
-          boardGraph = boardGraph + (pos -> neighborStoneCoords(pos, c).toSet)
-        }
-      }
-    }
-    boardGraph
-  }
-
-  private def groups(c: Color): Set[Set[Coords]] = {
+  /**
+   * Returns all groups of the given color. Groups are sets of connected coordinates with stones of the same color.
+   */
+  def groups(c: Color): Set[Set[Coords]] = {
     var groups = Set[Set[Coords]]()
 
     allCoords.map {
@@ -237,7 +242,7 @@ case class Board(intersections:     Seq[Seq[Option[Color]]],
   /**
    * Returns true if playing the given color to the position would result in a capture.
    */
-  private def wouldCapture(c: Color, pos: Coords): Boolean = {
+  def wouldCapture(c: Color, pos: Coords): Boolean = {
     replace(Some(c), pos).intersections != replace(Some(c), pos).removeCapturedGroups(c.invert).intersections
   }
 
