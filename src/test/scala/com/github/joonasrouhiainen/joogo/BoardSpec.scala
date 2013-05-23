@@ -7,6 +7,7 @@ import org.specs2.mutable._
  *
  * @author Joonas Rouhiainen
  */
+
 class BoardSpec extends Specification {
 
   "A new 0x0 board" should {
@@ -31,8 +32,8 @@ class BoardSpec extends Specification {
   "A new 9x7 board" should {
 
     val board = new Board(9, 7)
-    val cornerCoords  = Set((1, 1), (1, board.height), (board.width, 1), (board.width, board.height))
-    val illegalCoords = Set((0, 0), (-1, -1), (board.height + 1, board.height + 1))
+    val cornerCoords  = Set(Coords(1, 1), Coords(1, board.height), Coords(board.width, 1), Coords(board.width, board.height))
+    val illegalCoords = Set(Coords(0, 0), Coords(-1, -1), Coords(board.height + 1, board.height + 1))
 
     "be empty when created" in {
       board.toString must_== "+++++++++\n" * 7
@@ -52,26 +53,20 @@ class BoardSpec extends Specification {
     }
 
     "allow playing a black stone at any intersection" in {
-      (1 to board.width) foreach {
-        x => (1 to board.height) foreach {
-          y => board.canPlay(Black, x, y) must beTrue
-        }
+      board.allCoords.foreach {
+        board.canPlay(Black, _) must beTrue
       }
     }
 
     illegalCoords.foreach {
-      case (x: Int, y: Int) => {
-
-        val pos = "(" + x + ", " + y + ")"
-
+      pos => {
         "disallow playing a black stone at " + pos in {
-          board.canPlay(Black, x, y) must throwA [IllegalArgumentException]
+          board.canPlay(Black, pos) must throwA [IllegalArgumentException]
         }
 
         "disallow getting a stone at " + pos in {
-          board.get(x, y) must throwA [IllegalArgumentException]
+          board.get(pos) must throwA [IllegalArgumentException]
         }
-
       }
     }
 
@@ -84,40 +79,32 @@ class BoardSpec extends Specification {
     }
 
     "have only empty neighbors for every intersection" in {
-      (1 to board.width) foreach {
-        x => (1 to board.height) foreach {
-          y => board.neighbors(x, y).foreach(_.isEmpty must beTrue)
-        }
-      }
+      board.allCoords.foreach(board.neighbors(_).foreach(_.isEmpty must beTrue))
     }
 
     "have a neighbor count of 4 for all intersections not near the edges" in {
       (2 until board.width) foreach {
         x => (2 until board.height) foreach {
-          y => board.neighbors(x, y).size must_== 4
+          y => board.neighbors(Coords(x, y)).size must_== 4
         }
       }
     }
 
     "have a neighbor count of 2 for intersections in the four corners" in {
-      cornerCoords.foreach {
-        case (x: Int, y: Int) => {
-          board.neighbors(x, y).size must_== 2
-        }
-      }
+      cornerCoords.foreach(board.neighbors(_).size must_== 2)
     }
 
     "have a neighbor count of 3 for intersections near the edges but not in corners" in {
 
-      val mustHaveThreeNeighbors = (x: Int, y: Int) => if (!cornerCoords.contains((x, y))) board.neighbors(x, y).size must_== 3
+      val mustHaveThreeNeighbors = (pos: Coords) => if (!cornerCoords.contains(pos)) board.neighbors(pos).size must_== 3
 
       // First row and last row
-      List(1, board.height).foreach { y =>
-        (2 until board.width).foreach(x => mustHaveThreeNeighbors(x, y))
+      Seq(1, board.height).foreach { y =>
+        (2 until board.width).foreach(x => mustHaveThreeNeighbors(Coords(x, y)))
       }
       // First col and last col
-      List(1, board.width).foreach{ x =>
-        (2 until board.height).foreach(y => mustHaveThreeNeighbors(x, y))
+      Seq(1, board.width).foreach{ x =>
+        (2 until board.height).foreach(y => mustHaveThreeNeighbors(Coords(x, y)))
       }
     }
 
@@ -127,7 +114,7 @@ class BoardSpec extends Specification {
 
     val emptyBoard = new Board(9, 7)
     val board      = emptyBoard.play(1, 2)
-    val neighbors  = Set((1, 1), (2, 2), (1,3))
+    val neighbors  = Seq(Coords(1, 1), Coords(2, 2), Coords(1,3))
 
     "make a black stone retrievable from the position" in {
       board.get(1, 2).get must_== Black
@@ -153,16 +140,13 @@ class BoardSpec extends Specification {
     }
 
     neighbors.foreach {
-      case (x: Int, y: Int) => {
-
-        val pos = "(" + x + ", " + y + ")"
-
+      pos => {
         "make neighbor at " + pos + " have exactly one neighbor" in {
-          board.neighbors(x, y).count(_ isDefined) must_== 1
+          board.neighbors(pos).count(_ isDefined) must_== 1
         }
 
         "make neighbor at " + pos + " have a black neighbor" in {
-          board.neighbors(x, y).find(_ isDefined).get.get must_== Black
+          board.neighbors(pos).find(_ isDefined).get.get must_== Black
         }
       }
     }
