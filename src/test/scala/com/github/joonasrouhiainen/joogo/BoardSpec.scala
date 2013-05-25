@@ -3,11 +3,10 @@ package com.github.joonasrouhiainen.joogo
 import org.specs2.mutable._
 
 /**
- * Unit tests for classes Board and Color.
+ * Unit tests for Board.
  *
  * @author Joonas Rouhiainen
  */
-
 class BoardSpec extends Specification {
 
   "A new 0x0 board" should {
@@ -23,8 +22,7 @@ class BoardSpec extends Specification {
     val board = new Board(9)
 
     "be 9x9" in {
-      board.width  must_== 9
-      board.height must_== 9
+      (board.width must_== 9) and (board.height must_== 9)
     }
 
   }
@@ -39,17 +37,12 @@ class BoardSpec extends Specification {
       board.toString must_== "+++++++++\n" * 7
     }
 
-    "have a width of 9" in {
-      board.width must_== 9
-    }
-
-    "have a height of 7" in {
-      board.height must_== 7
+    "be 9x7" in {
+      (board.width must_== 9) and (board.height must_== 7)
     }
 
     "have black and white captured count of 0" in {
-      board.capturesForColors(Black) must_== 0
-      board.capturesForColors(Black) must_== board.capturesForColors(White)
+      (board.capturesForColors(Black) must_== 0) and (board.capturesForColors(White) must_== 0)
     }
 
     "allow playing a black stone at any intersection" in {
