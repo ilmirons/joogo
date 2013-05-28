@@ -12,6 +12,10 @@ case class Game(players: Map[Color, Option[Player]], boardStates: Seq[Board], is
 
   def addPlayer(color: Color, player: Player): Game = copy(players = players + (color -> Option(player)))
 
+  private def ensurePlayerPresent(color: Color): Unit = {
+    if (players(color).isEmpty) throw new NoPlayerException
+  }
+
   /**
    * Returns the newest board state.
    */
@@ -19,7 +23,8 @@ case class Game(players: Map[Color, Option[Player]], boardStates: Seq[Board], is
 
   def moveNumber: Int = boardStates.indices.last
 
-  def pass(): Game = {
+  def pass(color: Color): Game = {
+    ensurePlayerPresent(color)
     val passingWillEndGame = moveNumber >= 1 && board == boardStates(moveNumber - 1)
 
     if (passingWillEndGame) copy(isFinished = true)
@@ -29,8 +34,13 @@ case class Game(players: Map[Color, Option[Player]], boardStates: Seq[Board], is
   }
 
   def play(color: Color, coords: Coords): Game = {
+    ensurePlayerPresent(color)
     if (board.whoseTurn == color) copy(boardStates = boardStates.+:(board.play(coords)))
     else copy()
   }
 
+  def whoseTurn = board.whoseTurn
+
 }
+
+class NoPlayerException extends Exception
