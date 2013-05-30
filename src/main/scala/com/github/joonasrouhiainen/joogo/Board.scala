@@ -55,9 +55,9 @@ case class Board(intersections:     Seq[Seq[Option[Color]]],
     whoseTurn == col &&
     // The intersection must be empty.
     get(pos).isEmpty &&
-    // The intersection either has some liberties or all neighbors have the same color and it's not the last liberty of the group or playing there captures something.
-    (liberties(pos) > 0 || neighbors(pos).forall(_.get == whoseTurn) && !wouldCapture(col.invert, pos) || wouldCapture(col, pos)) &&
-    // The intersection is not under ko.
+    // A stone at the intersection must be alive after removing the groups it captures.
+    replace(Some(col), pos).removeCapturedGroups(col.invert).isAlive(pos) &&
+    // The intersection must not be under ko.
     !(koPosition.isDefined && koPosition.get == pos)
   }
 
@@ -239,11 +239,8 @@ case class Board(intersections:     Seq[Seq[Option[Color]]],
     }
   }
 
-  /**
-   * Returns true if playing the given color to the position would result in a capture.
-   */
-  def wouldCapture(c: Color, pos: Coords): Boolean = {
-    replace(Some(c), pos).intersections != replace(Some(c), pos).removeCapturedGroups(c.invert).intersections
+  def isAlive(pos: Coords): Boolean = {
+    groupAt(pos).exists(liberties(_) > 0)
   }
 
 }

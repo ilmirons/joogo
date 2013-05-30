@@ -320,4 +320,15 @@ class BoardSpec extends Specification {
 
   }
 
+  "An empty corner intersection with zero liberties and with neighboring black and white stones with liberties" should {
+
+    val board = new Board(2, 2).play(1, 1).play(2, 2)
+
+    "allow playing black or white in the corner" in {
+      board.play(1, 2).get(1, 2).get must_== Black
+      board.endTurn.play(1, 2).get(1, 2).get must_== White
+    }
+
+  }
+
 }
