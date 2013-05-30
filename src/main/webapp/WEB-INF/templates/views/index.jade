@@ -1,26 +1,95 @@
 -@ val board: com.github.joonasrouhiainen.joogo.Board
 
+:css
+    body {
+        background: #eee;
+        color: #222;
+        font-family: Helvetica, sans-serif;
+        text-align: center;
+    }
+
+    .board {
+        background-color: #da0;
+        border: 1px solid #666;
+        display: table;
+        margin: 0 auto;
+        padding: 30px 0 0 30px;
+    }
+
+    .board table {
+        border: 1px;
+        border-spacing: 0;
+        border-collapse: collapse;
+    }
+
+    .board td {
+        border: 1px solid #000;
+        width: 30px;
+        height: 30px;
+        margin: 0;
+        padding: 0;
+    }
+
+    .board td button {
+        border: 1px solid #222;
+        background-height: 50%;
+        border-radius: 20px;
+        position: relative;
+        display: block;
+        margin: 0;
+        padding: 0;
+        left: -16px;
+        top: -16px;
+        width: 30px;
+        height: 30px;
+    }
+
+    .board button.empty {
+        background: none;
+        border: none;
+    }
+
+    .board button.b {
+        background-color: #000;
+        background-image: -webkit-linear-gradient(#999, #000);
+    }
+
+    .board button.w {
+        background-color: #fff;
+        background-image: -webkit-linear-gradient(#fff, #ccc);
+    }
+
+    .board .col-last,
+    .board .row-last td {
+        border: none;
+    }
+
 h1 JooGo
 
-p Play go online with JooGo!
-
-p Board
-
-pre
-	= board
+.container
+    .board
+        table
+            - for (y <- 1 to board.height)
+                - val rowClass = "row-" + y
+                tr(class={if (y == board.height) rowClass + " row-last" else rowClass})
+                    - for (x <- 1 to board.width)
+                        - val colClass = "col-" + x
+                        td(class={if (x == board.width) colClass + " col-last" else colClass})
+                            form(action="/" method="POST")
+                                input(type="hidden" name="x" value={x})
+                                input(type="hidden" name="y" value={y})
+                                - val stoneColor = board.get(x, y)
+                                - val stoneClass = if (stoneColor.isDefined) stoneColor.get else "empty" 
+                                button(type="submit" class={stoneClass})
 
 p = "It's " + board.whoseTurn + "'s turn."
 p = "Captured stones: " + board.capturesForColors
 
 form(action="/pass" method="POST")
-	button(type="submit") Pass turn
-
-form(action="/" method="POST")
-	input#x(name="x")
-	input#y(name="y")
-	button(type="submit") Make a move!
+    button(type="submit") Pass turn
 
 form(action="/new" method="POST")
-	input#x(name="x")
-	input#y(name="y")
-	button(type="submit") New board
+    input#x(name="x")
+    span x
+    input#y(name="y")
+    button(type="submit") New board
