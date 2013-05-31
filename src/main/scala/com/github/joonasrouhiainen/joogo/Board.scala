@@ -8,10 +8,10 @@ import scala.annotation.tailrec
  *
  * @author Joonas Rouhiainen
  */
-case class Board(intersections:     Seq[Seq[Option[Color]]],
-                 capturesForColors: Map[Color, Int],
-                 whoseTurn:         Color,
-                 koPosition:        Option[Coords]) {
+case class Board private(intersections:     Seq[Seq[Option[Color]]],
+                         capturesForColors: Map[Color, Int],
+                         whoseTurn:         Color,
+                         koPosition:        Option[Coords]) {
 
   val width  = intersections(0).length
   val height = intersections.length

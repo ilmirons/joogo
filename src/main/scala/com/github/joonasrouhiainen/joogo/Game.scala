@@ -1,6 +1,6 @@
 package com.github.joonasrouhiainen.joogo
 
-case class Game(players: Map[Color, Option[Player]], boardStates: Seq[Board], isFinished: Boolean) {
+case class Game private(players: Map[Color, Option[Player]], boardStates: Seq[Board], isFinished: Boolean) {
 
   def this(boardWidth: Int, boardHeight: Int) {
     this(Map(Black -> None, White -> None), Seq(new Board(boardWidth, boardHeight)), false)
@@ -12,14 +12,14 @@ case class Game(players: Map[Color, Option[Player]], boardStates: Seq[Board], is
 
   def addPlayer(color: Color, player: Player): Game = copy(players = players + (color -> Option(player)))
 
-  private def ensurePlayerPresent(color: Color): Unit = {
-    if (players(color).isEmpty) throw new NoPlayerException
-  }
-
   /**
    * Returns the newest board state.
    */
   def board: Board = boardStates.head
+
+  private def ensurePlayerPresent(color: Color): Unit = {
+    if (players(color).isEmpty) throw new NoPlayerException
+  }
 
   def moveNumber: Int = boardStates.indices.last
 
