@@ -14,10 +14,14 @@ sealed trait Color {
     case White => Black
   }
 
+  def resigned: Result = new Resigned(this)
+
   override def toString: String = this match {
     case Black => "b"
     case White => "w"
   }
+
+  def wonByScore(scoresForColors: Map[Color, Float]): Result = new WonByScore(this, scoresForColors)
 
 }
 

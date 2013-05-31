@@ -34,8 +34,8 @@ case class Board private(intersections:     Seq[Seq[Option[Color]]],
     this(sideLength, sideLength)
   }
 
-  private def addCaptureForColor(col: Color, capture: Int): Board = {
-    copy(capturesForColors = capturesForColors + (col -> (capturesForColors(col) + capture)))
+  private def addCaptureForColor(c: Color, capture: Int): Board = {
+    copy(capturesForColors = capturesForColors + (c -> (capturesForColors(c) + capture)))
   }
 
   def allCoords: Seq[Coords] = Coords.all(width, height)
@@ -45,20 +45,65 @@ case class Board private(intersections:     Seq[Seq[Option[Color]]],
    */
   def canGet(pos: Coords): Boolean = (pos.x >= 1 && pos.y >= 1 && pos.x <= width && pos.y <= height)
 
-  def canPlay(col: Color, x: Int, y: Int): Boolean = canPlay(col, Coords(x, y))
+  def canPlay(c: Color, x: Int, y: Int): Boolean = canPlay(c, Coords(x, y))
 
   /**
    * Checks that it is the right color's turn and that the intersection is empty.
    */
-  def canPlay(col: Color, pos: Coords): Boolean = {
+  def canPlay(c: Color, pos: Coords): Boolean = {
     // The correct color must be in turn.
-    whoseTurn == col &&
+    whoseTurn == c &&
     // The intersection must be empty.
     get(pos).isEmpty &&
     // A stone at the intersection must be alive after removing the groups it captures.
-    replace(Some(col), pos).removeCapturedGroups(col.invert).isAlive(pos) &&
+    replace(Some(c), pos).removeCapturedGroups(c.invert).isAlive(pos) &&
     // The intersection must not be under ko.
     !(koPosition.isDefined && koPosition.get == pos)
+  }
+
+  /**
+   * Returns a group graph (intersections as keys, neighbors as values) for the stone group or
+   * connected empty territory at the given position.
+   */
+  private def componentAt(pos: Coords): Set[Coords] = {
+    require(canGet(pos))
+
+    /**
+     * Builds a graph of all stones of the given color (or empty intersections if given None).
+     * Coordinates as keys, neighbor coordinates as values.
+     */
+    def boardGraph(intersectionType: Option[Color]): Map[Coords, Set[Coords]] = {
+      var graph = Map[Coords, Set[Coords]]()
+
+      allCoords.map {
+        pos => {
+          if (get(pos) == intersectionType) {
+            graph = graph + (pos -> neighborCoords(pos).filter(get(_) == intersectionType).toSet)
+          }
+        }
+      }
+      graph
+    }
+
+    /**
+     * Accumulates group or territory members with breadth-first search.
+     */
+    @tailrec
+    def buildComponent(graph:        Map[Coords, Set[Coords]],
+                       toVisit:      Seq[Coords],
+                       visited:      Set[Coords],
+                       component: Seq[Coords]): Seq[Coords] = {
+
+      if (toVisit.nonEmpty) {
+        val currentCoords = toVisit.head
+        val unvisitedNeighbors = (graph(currentCoords) -- visited -- toVisit).toSeq
+        // Accumulate component with recursion (recursive call with currentCoords prepended to component).
+        buildComponent(graph, toVisit.tail ++ unvisitedNeighbors, visited + currentCoords, component :+ currentCoords)
+      }
+      else component
+    }
+
+    buildComponent(boardGraph(get(pos)), Seq(pos), Set.empty, Seq.empty).toSet
   }
 
   /**
@@ -77,65 +122,31 @@ case class Board private(intersections:     Seq[Seq[Option[Color]]],
   }
 
   /**
-   * Returns a group graph (intersections as keys, neighbors as values) for the group at given position.
+   * Returns the board graph component for the stone group at the given position.
    */
   def groupAt(pos: Coords): Set[Coords] = {
-    require(canGet(pos))
-
-    /**
-     * Builds a graph of all stones of the given color: stone coordinates as keys, neighbor stone coordinates as values.
-     */
-    def stoneGraph(c: Color): Map[Coords, Set[Coords]] = {
-      var boardGraph = Map[Coords, Set[Coords]]()
-
-      allCoords.map {
-        pos => {
-          if (get(pos).isDefined && get(pos).get == c) {
-            boardGraph = boardGraph + (pos -> neighborStoneCoords(pos, c).toSet)
-          }
-        }
-      }
-      boardGraph
-    }
-
-    /**
-     * Accumulates group members with breadth-first search.
-     */
-    @tailrec
-    def buildGroup(graph:        Map[Coords, Set[Coords]],
-                   toVisit:      Seq[Coords],
-                   visited:      Set[Coords],
-                   groupMembers: Seq[Coords]): Seq[Coords] = {
-
-      if (toVisit.nonEmpty) {
-        val currentCoords = toVisit.head
-        val unvisitedNeighbors = (graph(currentCoords) -- visited -- toVisit).toSeq
-        // Accumulate groupMembers with recursion (recursive call with currentCoords prepended to groupMembers).
-        buildGroup(graph, toVisit.tail ++ unvisitedNeighbors, visited + currentCoords, groupMembers :+ currentCoords)
-      }
-      else groupMembers
-    }
-
-    if (get(pos).isDefined) {
-      buildGroup(stoneGraph(get(pos).get), Seq(pos), Set.empty, Seq.empty).toSet
-    }
-    else Set.empty
+    require(get(pos).isDefined)
+    componentAt(pos)
   }
 
   /**
    * Returns all groups of the given color. Groups are sets of connected coordinates with stones of the same color.
    */
   def groups(c: Color): Set[Set[Coords]] = {
-    var groups = Set[Set[Coords]]()
+    components(Some(c))
+  }
+
+  private def components(intersectionType: Option[Color]): Set[Set[Coords]] = {
+    var foundComponents = Set[Set[Coords]]()
 
     allCoords.map {
       pos => {
-        if (get(pos).isDefined && get(pos).get == c) {
-          groups = groups + groupAt(pos)
+        if (get(pos) == intersectionType) {
+          foundComponents = foundComponents + componentAt(pos)
         }
       }
     }
-    groups
+    foundComponents
   }
 
   def liberties(pos: Coords): Int = neighbors(pos) count (_ isEmpty)
@@ -144,9 +155,10 @@ case class Board private(intersections:     Seq[Seq[Option[Color]]],
    * Returns the coordinates for all neighbor intersections of the given position.
    */
   def neighborCoords(pos: Coords): Seq[Coords] = {
-    Seq(Coords(-1, 0), Coords(1, 0), Coords(0, -1), Coords(0, 1)) // Coordinate differences for neighboring intersections in four directions: left, right, up, down.
-      .map   (diff => Coords(pos.x + diff.x, pos.y + diff.y))     // Map to actual coordinates
-      .filter(canGet(_))                                          // Filter valid coordinates
+    // Coordinate differences for neighboring intersections in four directions: left, right, up, down.
+    Seq(Coords(-1, 0), Coords(1, 0), Coords(0, -1), Coords(0, 1))
+      .map   (diff => Coords(pos.x + diff.x, pos.y + diff.y)) // Map to actual coordinates
+      .filter(canGet _)                                      // Filter valid coordinates
   }
 
   /**
@@ -163,6 +175,13 @@ case class Board private(intersections:     Seq[Seq[Option[Color]]],
   def neighborStoneCoords(pos: Coords, c: Color): Seq[Coords] = {
     require(canGet(pos))
     neighborCoords(pos).filter(get(_).isDefined).filter(get(_).get == c)
+  }
+
+  /**
+   * Counts how many stones of the given color are on the board.
+   */
+  def numStones(c: Color): Int = {
+    allCoords.filter(get(_).isDefined).count(get(_).get == c)
   }
 
   def play(x: Int, y: Int): Board = play(Coords(x, y))
@@ -231,6 +250,21 @@ case class Board private(intersections:     Seq[Seq[Option[Color]]],
     copy(intersections = newIntersections)
   }
 
+  /**
+   * Returns all encircled territories that have only stones of the given color as neighbors.
+   */
+  def territories(c: Color): Set[Set[Coords]] = {
+    components(None).filter(_.forall(neighborStoneCoords(_, c.invert).isEmpty))
+  }
+
+  /**
+   * Returns the board graph component for the empty territory at the given position.
+   */
+  def territoryAt(pos: Coords): Set[Coords] = {
+    require(!get(pos).isDefined)
+    componentAt(pos)
+  }
+
   override def toString: String = {
     intersections.foldLeft("") {
       (boardString, row) => boardString + row.foldLeft("") {
@@ -239,6 +273,9 @@ case class Board private(intersections:     Seq[Seq[Option[Color]]],
     }
   }
 
+  /**
+   * Tests whether the group at pos has any liberties.
+   */
   def isAlive(pos: Coords): Boolean = {
     groupAt(pos).exists(liberties(_) > 0)
   }
