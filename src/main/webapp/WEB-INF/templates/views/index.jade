@@ -89,6 +89,9 @@ p = "Captured stones: " + board.capturesForColors
 form(action="/pass" method="POST")
     button(type="submit") Pass turn
 
+form(action="/resign" method="POST")
+    button(type="submit") Resign
+
 form(action="/new" method="POST")
     input#x(name="x")
     span x

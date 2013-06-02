@@ -35,6 +35,11 @@ class MainServlet extends JoogoStack with ScalateSupport {
     serveGame()
   }
 
+  post("/resign") {
+    game = game.resign
+    serveGame()
+  }
+
   post("/new") {
     if (params.get("x").isDefined && params.get("y").isDefined) {
       val x = params.get("x").get.toInt
