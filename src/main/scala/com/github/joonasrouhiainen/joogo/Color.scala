@@ -14,7 +14,7 @@ sealed trait Color {
     case White => Black
   }
 
-  def resigned: Result = new Resigned(this)
+  def resigned: Result = new Resigned(this.invert)
 
   override def toString: String = this match {
     case Black => "b"

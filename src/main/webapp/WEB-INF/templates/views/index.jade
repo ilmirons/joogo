@@ -83,7 +83,7 @@ h1 JooGo
                                 - val stoneClass = if (stoneColor.isDefined) stoneColor.get else "empty" 
                                 button(type="submit" class={stoneClass})
 
-p = "Move " + game.moveNumber + ". " + (if (game.isFinished) "Game over." else board.whoseTurn + "'s turn.")
+p = "Move " + game.moveNumber + ". " + (if (game.isFinished) "Game over. Result: " + game.result.get + "." else board.whoseTurn + "'s turn.")
 p = "Captured stones: " + board.capturesForColors
 
 form(action="/pass" method="POST")

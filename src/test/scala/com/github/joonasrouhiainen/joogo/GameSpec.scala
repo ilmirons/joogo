@@ -62,8 +62,12 @@ class GameSpec extends Specification {
     }
 
     "allow players to resign" in {
-      gameWithPlayers.resign.result.get      must_== Black.resigned
-      gameWithPlayers.pass.resign.result.get must_== White.resigned
+      val blackResigned = gameWithPlayers.resign.result.get
+      val whiteResigned = gameWithPlayers.pass.resign.result.get
+      blackResigned must_== Black.resigned
+      blackResigned.toString must_== White + "+res."
+      whiteResigned must_== White.resigned
+      whiteResigned.toString must_== Black + "+res."
     }
 
     "allow making a black pass and a white pass to end the game on white's turn" in {
@@ -75,14 +79,20 @@ class GameSpec extends Specification {
     "end the game with the correct result after one move and two passes" in {
       val oneBlackAndPassPass = gameWithPlayers.play(2, 2).pass.pass
       val allPoints = oneBlackAndPassPass.board.width * oneBlackAndPassPass.board.height
+      val result = oneBlackAndPassPass.result.get
+
       oneBlackAndPassPass.isFinished must beTrue
-      oneBlackAndPassPass.result.get must_== Black.wonByScore(Map(Black -> allPoints, White -> 0))
+      result must_== Black.wonByScore(Map(Black -> allPoints, White -> 0))
+      result.toString must_== Black + "+" + allPoints.toFloat
     }
 
     "end the game with the correct result when both players have encircled one point of territory and passed" in {
       val cornerForBoth = gameWithPlayers.play(1, 2).play(3, 2).play(2, 1).play(2, 3).pass.pass
+      val result = cornerForBoth.result.get
+
       cornerForBoth.isFinished must beTrue
-      cornerForBoth.result.get must_== new Draw(Map(Black -> 3, White -> 3))
+      result must_== new Draw(Map(Black -> 3, White -> 3))
+      result.toString must_== "Draw"
     }
 
     "should not react to illegal moves" in {
