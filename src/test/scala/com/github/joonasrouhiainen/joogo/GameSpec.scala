@@ -85,6 +85,12 @@ class GameSpec extends Specification {
       cornerForBoth.result.get must_== new Draw(Map(Black -> 3, White -> 3))
     }
 
+    "should not react to illegal moves" in {
+      val oneMove = gameWithPlayers.play(1, 1)
+      val twoMovesAtSameIntersection = oneMove.play(1, 1)
+      twoMovesAtSameIntersection must_== oneMove
+    }
+
   }
 
 }

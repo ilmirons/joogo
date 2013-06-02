@@ -42,7 +42,10 @@ case class Game private(players: Map[Color, Option[Player]], boardStates: Seq[Bo
   def play(coords: Coords): Game = {
     require(!isFinished)
     ensurePlayerPresent(whoseTurn)
-    withMove(board.play(coords))
+    if (board.canPlay(whoseTurn, coords)) {
+      withMove(board.play(coords))
+    }
+    else copy()
   }
 
   def resign: Game = {
