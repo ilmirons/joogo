@@ -79,6 +79,12 @@ class GameSpec extends Specification {
       oneBlackAndPassPass.result.get must_== Black.wonByScore(Map(Black -> allPoints, White -> 0))
     }
 
+    "end the game with the correct result when both players have encircled one point of territory and passed" in {
+      val cornerForBoth = gameWithPlayers.play(1, 2).play(3, 2).play(2, 1).play(2, 3).pass.pass
+      cornerForBoth.isFinished must beTrue
+      cornerForBoth.result.get must_== new Draw(Map(Black -> 3, White -> 3))
+    }
+
   }
 
 }
