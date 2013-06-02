@@ -1,9 +1,8 @@
 package com.github.joonasrouhiainen.joogo
 
 import org.scalatra._
-import scalate.ScalateSupport
 
-class MainServlet extends JoogoStack with ScalateSupport {
+class MainServlet extends JoogoStack {
 
   var game = newGame(9, 9)
   newGame(9, 9)
