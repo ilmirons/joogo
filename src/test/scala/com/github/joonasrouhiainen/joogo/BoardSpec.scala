@@ -9,7 +9,7 @@ import org.specs2.mutable._
  */
 class BoardSpec extends Specification {
 
-  "A new 0x0 board" should {
+  "A 0x0 board" should {
 
     "be disallowed" in {
       new Board(0, 0) must throwA[IllegalArgumentException]
@@ -17,17 +17,43 @@ class BoardSpec extends Specification {
 
   }
 
-  "A new square 9 board" should {
+  "A 9x9 board" should {
 
     val board = new Board(9)
 
-    "be 9x9" in {
+    "have a width and height of 9" in {
       (board.width must_== 9) and (board.height must_== 9)
+    }
+
+    "have 5 hoshi: 3x3, 7x3, 3x7, 7x7 and 5x5" in {
+      board.hoshi must_== Set(Coords(3, 3), Coords(7, 3), Coords(3, 7), Coords(7, 7), Coords(5, 5))
     }
 
   }
 
-  "A new 9x7 board" should {
+  "A 13x13 board" should {
+
+    val board = new Board(13)
+
+    "have 5 hoshi: 4x4, 10x4, 4x10, 10x10 and 7x7" in {
+      board.hoshi must_== Set(Coords(4,4), Coords(10,4), Coords(4,10), Coords(10,10), Coords(7,7))
+    }
+
+  }
+
+  "A 19x19 board" should {
+
+    val board = new Board(19)
+
+    "have 9 hoshi: 4x4, 10x4, 16x4, 4x10, 10x10, 16x10, 4x16, 10x16, 16x16" in {
+      board.hoshi must_== Set(Coords(4, 4),  Coords(10, 4),  Coords(16, 4),
+                              Coords(4, 10), Coords(10, 10), Coords(16, 10),
+                              Coords(4, 16), Coords(10, 16), Coords(16, 16))
+    }
+
+  }
+
+  "A 9x7 board" should {
 
     val board = new Board(9, 7)
     val cornerCoords  = Set(Coords(1, 1), Coords(1, board.height), Coords(board.width, 1), Coords(board.width, board.height))

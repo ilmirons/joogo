@@ -2,6 +2,8 @@ package com.github.joonasrouhiainen.joogo
 
 /**
  * A game of go with chinese rules.
+ *
+ * @author Joonas Rouhiainen
  */
 case class Game private(players: Map[Color, Option[Player]], boardStates: Seq[Board], result: Option[Result]) {
 

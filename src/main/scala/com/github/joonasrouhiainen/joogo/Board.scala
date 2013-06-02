@@ -106,6 +106,19 @@ case class Board private(intersections:     Seq[Seq[Option[Color]]],
     buildComponent(boardGraph(get(pos)), Seq(pos), Set.empty, Seq.empty).toSet
   }
 
+  private def components(intersectionType: Option[Color]): Set[Set[Coords]] = {
+    var foundComponents = Set[Set[Coords]]()
+
+    allCoords.map {
+      pos => {
+        if (get(pos) == intersectionType) {
+          foundComponents = foundComponents + componentAt(pos)
+        }
+      }
+    }
+    foundComponents
+  }
+
   /**
    * Inverts color in turn and resets ko. Can be used to pass a turn.
    */
@@ -136,17 +149,22 @@ case class Board private(intersections:     Seq[Seq[Option[Color]]],
     components(Some(c))
   }
 
-  private def components(intersectionType: Option[Color]): Set[Set[Coords]] = {
-    var foundComponents = Set[Set[Coords]]()
+  def hoshi: Set[Coords] = {
+    // Define hoshi for square boards only
+    if (width == height) {
+      val centerCoord = width / 2 + 1
+      val tengen = Coords(centerCoord, centerCoord)
 
-    allCoords.map {
-      pos => {
-        if (get(pos) == intersectionType) {
-          foundComponents = foundComponents + componentAt(pos)
-        }
+      width match {
+        case 9  => Set(Coords(3, 3),  Coords(7, 3),   Coords(3, 7),  Coords(7, 7),   tengen)
+        case 13 => Set(Coords(4, 4),  Coords(10, 4),  Coords(4, 10), Coords(10, 10), tengen)
+        case 19 => Set(Coords(4, 4),  Coords(10, 4),  Coords(16, 4),
+                       Coords(4, 10), Coords(10, 10), Coords(16, 10),
+                       Coords(4, 16), Coords(10, 16), Coords(16, 16))
+        case _ => Set.empty
       }
     }
-    foundComponents
+    else Set.empty
   }
 
   def liberties(pos: Coords): Int = neighbors(pos) count (_ isEmpty)

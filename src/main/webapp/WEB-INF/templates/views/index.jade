@@ -1,4 +1,6 @@
--@ val game: com.github.joonasrouhiainen.joogo.Game
+- import com.github.joonasrouhiainen.joogo._
+
+-@ val game: Game
 - val board = game.board
 
 h1 JooGo
@@ -15,9 +17,12 @@ h1 JooGo
                             form(action="/" method="POST")
                                 input(type="hidden" name="x" value={x})
                                 input(type="hidden" name="y" value={y})
+                                - val isHoshi    = board.hoshi.contains(new Coords(x, y))
                                 - val stoneColor = board.get(x, y)
-                                - val stoneClass = if (stoneColor.isDefined) stoneColor.get else "empty" 
-                                button(type="submit" class={stoneClass})
+                                - val colorClass = if (stoneColor.isDefined) stoneColor.get else "empty" 
+                                button(type="submit" class={colorClass})
+                                    - if (isHoshi && !stoneColor.isDefined)
+                                        .hoshi
 
 p = "Move " + game.moveNumber + ". " + (if (game.isFinished) "Game over. Result: " + game.result.get + "." else board.whoseTurn + "'s turn.")
 p = "Captured stones: " + board.capturesForColors
