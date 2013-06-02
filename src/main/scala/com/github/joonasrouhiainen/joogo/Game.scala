@@ -26,12 +26,12 @@ case class Game private(players: Map[Color, Option[Player]], boardStates: Seq[Bo
 
   def isFinished: Boolean = result.isDefined
 
-  def moveNumber: Int = boardStates.indices.last
+  def moveNumber: Int = boardStates.size
 
   def pass: Game = {
     require(!isFinished)
     ensurePlayerPresent(whoseTurn)
-    val passingWillEndGame = moveNumber >= 1 && board.intersections == boardStates(1).intersections
+    val passingWillEndGame = moveNumber >= 2 && board.intersections == boardStates(1).intersections
 
     if (passingWillEndGame) copy(result = Some(chineseScore))
     else withMove(board.endTurn)

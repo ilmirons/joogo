@@ -8,8 +8,8 @@ class GameSpec extends Specification {
 
     val game = new Game(19, 19)
 
-    "have a move number of 0" in {
-      game.moveNumber must_== 0
+    "have a move number of 1" in {
+      game.moveNumber must_== 1
     }
 
     "have no players" in {
@@ -50,13 +50,13 @@ class GameSpec extends Specification {
     "allow black to make a valid pass" in {
       val onePass = gameWithPlayers.pass
       onePass.isFinished must beFalse
-      onePass.moveNumber must_== 1
+      onePass.moveNumber must_== 2
       onePass.whoseTurn must_== White
     }
 
     "allow making a black move that updates the move number and adds the stone" in {
       val oneMove = gameWithPlayers.play(2, 2)
-      oneMove.moveNumber must_== 1
+      oneMove.moveNumber must_== 2
       oneMove.board.get(2, 2).get must_== Black
       oneMove.boardStates.size must_== 2
     }

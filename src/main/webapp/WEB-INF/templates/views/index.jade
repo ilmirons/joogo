@@ -1,4 +1,5 @@
--@ val board: com.github.joonasrouhiainen.joogo.Board
+-@ val game: com.github.joonasrouhiainen.joogo.Game
+- val board = game.board
 
 :css
     body {
@@ -82,7 +83,7 @@ h1 JooGo
                                 - val stoneClass = if (stoneColor.isDefined) stoneColor.get else "empty" 
                                 button(type="submit" class={stoneClass})
 
-p = "It's " + board.whoseTurn + "'s turn."
+p = "Move " + game.moveNumber + ". " + (if (game.isFinished) "Game over." else board.whoseTurn + "'s turn.")
 p = "Captured stones: " + board.capturesForColors
 
 form(action="/pass" method="POST")

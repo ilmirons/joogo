@@ -2,42 +2,46 @@ package com.github.joonasrouhiainen.joogo
 
 import org.scalatra._
 import scalate.ScalateSupport
-import scala.xml.XML
 
 class MainServlet extends JoogoStack with ScalateSupport {
 
-  var board = new Board(9)
+  var game = newGame(9, 9)
+  newGame(9, 9)
 
-  def serveBoard() = {
+  def newGame(x: Int, y: Int): Game = {
+    new Game(x, y).addPlayer(Black, new Player("black")).addPlayer(White, new Player("white"))
+  }
+
+  def serveGame() = {
     contentType = "text/html"
-    jade("index", "board" -> board)
+    jade("index", "game" -> game)
   }
 
   get("/") {
-    serveBoard()
+    serveGame()
   }
 
   post("/") {
     if (params.get("x").isDefined && params.get("y").isDefined) {
       val x = params.get("x").get.toInt
       val y = params.get("y").get.toInt
-      board = board.play(x, y)
+      game = game.play(x, y)
     }
-    serveBoard()
+    serveGame()
   }
 
   post("/pass") {
-    board = board.endTurn
-    serveBoard()
+    game = game.pass
+    serveGame()
   }
 
   post("/new") {
     if (params.get("x").isDefined && params.get("y").isDefined) {
       val x = params.get("x").get.toInt
       val y = params.get("y").get.toInt
-      board = new Board(x, y)
+      game = newGame(x, y)
     }
-    serveBoard()
+    serveGame()
   }
   
 }
