@@ -17,13 +17,33 @@ class BoardSpec extends Specification {
 
   }
 
+  "A 4x4 board" should {
+
+    val board = new Board(4)
+
+    "have a width and height of 4" in {
+      (board.width must_== 4) and (board.height must_== 4)
+    }
+
+    "have no hoshi" in {
+      board.hoshi must beEmpty
+    }
+
+  }
+
+  "A 5x5 board" should {
+
+    val board = new Board(5)
+
+    "have a tengen" in {
+      board.hoshi must_== Set(Coords(3, 3))
+    }
+
+  }
+
   "A 9x9 board" should {
 
     val board = new Board(9)
-
-    "have a width and height of 9" in {
-      (board.width must_== 9) and (board.height must_== 9)
-    }
 
     "have 5 hoshi: 3x3, 7x3, 3x7, 7x7 and 5x5" in {
       board.hoshi must_== Set(Coords(3, 3), Coords(7, 3), Coords(3, 7), Coords(7, 7), Coords(5, 5))
@@ -37,6 +57,16 @@ class BoardSpec extends Specification {
 
     "have 5 hoshi: 4x4, 10x4, 4x10, 10x10 and 7x7" in {
       board.hoshi must_== Set(Coords(4,4), Coords(10,4), Coords(4,10), Coords(10,10), Coords(7,7))
+    }
+
+  }
+
+  "A 15x9 board" should {
+
+    val board = new Board(15, 9)
+
+    "have 5 hoshi: 2x2, 13x2, 2x7, 13x7 and 8x5" in {
+      board.hoshi must_== Set(Coords(3, 3), Coords(13, 3), Coords(3, 7), Coords(13, 7), Coords(8,5))
     }
 
   }

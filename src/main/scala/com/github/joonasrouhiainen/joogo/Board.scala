@@ -150,19 +150,36 @@ case class Board private(intersections:     Seq[Seq[Option[Color]]],
   }
 
   def hoshi: Set[Coords] = {
-    // Define hoshi for square boards only
-    if (width == height) {
-      val centerCoord = width / 2 + 1
-      val tengen = Coords(centerCoord, centerCoord)
+    // Center of the board.
+    val tengen = Coords(width / 2 + 1, height / 2 + 1)
+    // Smallest dimension of a rectangular board.
+    val smallestBoardDimension: Int = Seq(width, height).min
+    // Distance from the nearest board edge to corner and side hoshis is square root of the smallest board dimension.
+    val fromEdgeToHoshi: Int = Math.sqrt(smallestBoardDimension).round.toInt
 
-      width match {
-        case 9  => Set(Coords(3, 3),  Coords(7, 3),   Coords(3, 7),  Coords(7, 7),   tengen)
-        case 13 => Set(Coords(4, 4),  Coords(10, 4),  Coords(4, 10), Coords(10, 10), tengen)
-        case 19 => Set(Coords(4, 4),  Coords(10, 4),  Coords(16, 4),
-                       Coords(4, 10), Coords(10, 10), Coords(16, 10),
-                       Coords(4, 16), Coords(10, 16), Coords(16, 16))
-        case _ => Set.empty
-      }
+    def cornerHoshi(distanceToEdge: Int): Set[Coords] = {
+      require(distanceToEdge > 0)
+
+      // Possible coordinate values for corner hoshi: near the coordinates origin and on the other end.
+      val xValues = Set(distanceToEdge, width  - distanceToEdge + 1)
+      val yValues = Set(distanceToEdge, height - distanceToEdge + 1)
+
+      // Build all possible (x, y) coordinate combinations from the above values.
+      (for (x <- xValues; y <- yValues) yield Coords(x, y)).toSet
+    }
+
+    def sideHoshi(distanceToEdge: Int): Set[Coords] = {
+      require(distanceToEdge > 0)
+      Set(Coords(tengen.x, distanceToEdge), Coords(tengen.x, height - distanceToEdge + 1),
+          Coords(distanceToEdge, tengen.y), Coords(width - distanceToEdge + 1, tengen.y))
+    }
+
+    // When to add which hoshi type: tengen at 5x5, corners at 9x9, sides at 17x17.
+    if (Set(width, height).forall(_ % 2 == 1)) {
+      if      (smallestBoardDimension >= 17) cornerHoshi(fromEdgeToHoshi) ++ sideHoshi(fromEdgeToHoshi) + tengen
+      else if (smallestBoardDimension >= 9)  cornerHoshi(fromEdgeToHoshi) + tengen
+      else if (smallestBoardDimension >= 5)  Set(tengen)
+      else Set.empty
     }
     else Set.empty
   }
