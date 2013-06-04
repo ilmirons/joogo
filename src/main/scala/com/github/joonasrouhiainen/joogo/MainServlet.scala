@@ -1,7 +1,5 @@
 package com.github.joonasrouhiainen.joogo
 
-import org.scalatra._
-
 class MainServlet extends JoogoStack {
 
   var game = newGame(9, 9)
@@ -17,7 +15,7 @@ class MainServlet extends JoogoStack {
   }
 
   get("/") {
-    serveGame()
+    serveGame
   }
 
   post("/") {
@@ -26,17 +24,17 @@ class MainServlet extends JoogoStack {
       val y = params.get("y").get.toInt
       game = game.play(x, y)
     }
-    serveGame()
+    serveGame
   }
 
   post("/pass") {
     game = game.pass
-    serveGame()
+    serveGame
   }
 
   post("/resign") {
     game = game.resign
-    serveGame()
+    serveGame
   }
 
   post("/new") {
@@ -45,7 +43,7 @@ class MainServlet extends JoogoStack {
       val y = params.get("y").get.toInt
       game = newGame(x, y)
     }
-    serveGame()
+    serveGame
   }
   
 }

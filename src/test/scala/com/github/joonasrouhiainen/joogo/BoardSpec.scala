@@ -101,6 +101,10 @@ class BoardSpec extends Specification {
       (board.capturesForColors(Black) must_== 0) and (board.capturesForColors(White) must_== 0)
     }
 
+    "should have 9 times 7 coordinates" in {
+      board.allCoords.size must_== 9 * 7
+    }
+
     "allow playing a black stone at any intersection" in {
       board.allCoords.foreach {
         board.canPlay(Black, _) must beTrue

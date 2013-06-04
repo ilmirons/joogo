@@ -38,7 +38,7 @@ case class Board private(intersections:     Seq[Seq[Option[Color]]],
     copy(capturesForColors = capturesForColors + (c -> (capturesForColors(c) + capture)))
   }
 
-  def allCoords: Seq[Coords] = Coords.all(width, height)
+  def allCoords: Seq[Coords] = for (x <- 1 to width; y <- 1 to height) yield Coords(x, y)
 
   /**
    * Checks whether the coordinates are legal.
