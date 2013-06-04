@@ -2,14 +2,22 @@ package com.github.joonasrouhiainen.joogo
 
 class MainServlet extends JoogoStack {
 
-  var game = newGame(9, 9)
-  newGame(9, 9)
+  val storage = new RuntimeGameStorage
+  var id = ""
 
-  def newGame(x: Int, y: Int): Game = {
-    new Game(x, y).addPlayer(Black, new Player("black")).addPlayer(White, new Player("white"))
+  store(new Game(9, 9))
+
+  def store(g: Game): Unit = {
+    id = storage.storeGame(g)
   }
 
-  def serveGame() = {
+  def game: Game = storage.getGame(id).get
+
+  def newGame(x: Int, y: Int) = {
+    store(new Game(x, y).addPlayer(Black, new Player("black")).addPlayer(White, new Player("white")))
+  }
+
+  def serveGame = {
     contentType = "text/html"
     jade("index", "game" -> game)
   }
@@ -22,18 +30,18 @@ class MainServlet extends JoogoStack {
     if (params.get("x").isDefined && params.get("y").isDefined) {
       val x = params.get("x").get.toInt
       val y = params.get("y").get.toInt
-      game = game.play(x, y)
+      store(game.play(x, y))
     }
     serveGame
   }
 
   post("/pass") {
-    game = game.pass
+    store(game.pass)
     serveGame
   }
 
   post("/resign") {
-    game = game.resign
+    store(game.resign)
     serveGame
   }
 
@@ -41,7 +49,7 @@ class MainServlet extends JoogoStack {
     if (params.get("x").isDefined && params.get("y").isDefined) {
       val x = params.get("x").get.toInt
       val y = params.get("y").get.toInt
-      game = newGame(x, y)
+      newGame(x, y)
     }
     serveGame
   }

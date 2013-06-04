@@ -85,9 +85,9 @@ case class Board private(intersections:     Seq[Seq[Option[Color]]],
      * Accumulates group or territory members with breadth-first search.
      */
     @tailrec
-    def buildComponent(graph:        Map[Coords, Set[Coords]],
-                       toVisit:      Seq[Coords],
-                       visited:      Set[Coords],
+    def buildComponent(graph:     Map[Coords, Set[Coords]],
+                       toVisit:   Seq[Coords],
+                       visited:   Set[Coords],
                        component: Seq[Coords]): Seq[Coords] = {
 
       if (toVisit.nonEmpty) {
