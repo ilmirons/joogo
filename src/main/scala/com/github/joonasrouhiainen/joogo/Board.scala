@@ -73,16 +73,12 @@ case class Board private(intersections:     Seq[Seq[Option[Color]]],
      * Coordinates as keys, neighbor coordinates as values.
      */
     def boardGraph(intersectionType: Option[Color]): Map[Coords, Set[Coords]] = {
-      var graph = Map[Coords, Set[Coords]]()
-
-      allCoords.map {
-        pos => {
-          if (get(pos) == intersectionType) {
-            graph = graph + (pos -> neighborCoords(pos).filter(get(_) == intersectionType).toSet)
-          }
+      val neighborsForCoords: Seq[(Coords, Set[Coords])] = {
+        for (pos <- allCoords.filter(get(_) == intersectionType)) yield {
+          pos -> neighborCoords(pos).filter(get(_) == intersectionType).toSet
         }
       }
-      graph
+      neighborsForCoords.toMap
     }
 
     /**
@@ -107,16 +103,7 @@ case class Board private(intersections:     Seq[Seq[Option[Color]]],
   }
 
   private def components(intersectionType: Option[Color]): Set[Set[Coords]] = {
-    var foundComponents = Set[Set[Coords]]()
-
-    allCoords.map {
-      pos => {
-        if (get(pos) == intersectionType) {
-          foundComponents = foundComponents + componentAt(pos)
-        }
-      }
-    }
-    foundComponents
+    (for (pos <- allCoords.filter(get(_) == intersectionType)) yield componentAt(pos)).toSet
   }
 
   /**
@@ -240,7 +227,9 @@ case class Board private(intersections:     Seq[Seq[Option[Color]]],
 
         // See what will be captured by this move: get the first stone of the intersection of the play coordinates'
         // neighborhood before and after this move
-        val singleCapturedPosition = neighborStoneCoords(pos, whoseTurn.invert).diff(boardForNextTurn.neighborStoneCoords(pos, whoseTurn.invert))(0)
+        val neighborsNow  = neighborStoneCoords(pos, whoseTurn.invert)
+        val neighborsNext = boardForNextTurn.neighborStoneCoords(pos, whoseTurn.invert)
+        val singleCapturedPosition = neighborsNow.diff(neighborsNext)(0)
 
         // If the opponent could play back at the captured position to capture exactly one stone (if ko was not set)
         if (boardForNextTurn.replace(Some(boardForNextTurn.whoseTurn), singleCapturedPosition).removeCapturedGroups(boardForNextTurn.whoseTurn).capturesForColors(boardForNextTurn.whoseTurn) == capturesForColors(boardForNextTurn.whoseTurn) + 1) {
@@ -260,18 +249,13 @@ case class Board private(intersections:     Seq[Seq[Option[Color]]],
     var operatedBoard = copy()
     var capturedCount = 0
 
-    groups(c).foreach {
-      group => {
-        if (group.nonEmpty && group.forall(liberties(_) == 0)) {
-          // If all members have zero liberties, remove the group's stones
-          group.foreach {
-            pos => {
-              operatedBoard = operatedBoard.replace(None, pos)
-              capturedCount += 1
-            }
-          }
-        }
+    // For all groups that have zero liberties for every stone
+    for (deadGroup <- groups(c).filter(_.nonEmpty).filter(_.forall(liberties(_) == 0))) yield {
+      // Remove all the group's stones
+      deadGroup.foreach { stone =>
+        operatedBoard = operatedBoard.replace(None, stone)
       }
+      capturedCount += deadGroup.size
     }
     operatedBoard.addCaptureForColor(whoseTurn, capturedCount)
   }
