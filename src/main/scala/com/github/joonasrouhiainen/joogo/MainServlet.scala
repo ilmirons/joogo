@@ -5,7 +5,7 @@ class MainServlet extends JoogoStack {
   val storage = new RuntimeGameStorage
   var id = ""
 
-  store(new Game(9, 9))
+  newGame(9, 9)
 
   def store(g: Game): Unit = {
     id = storage.storeGame(g)
