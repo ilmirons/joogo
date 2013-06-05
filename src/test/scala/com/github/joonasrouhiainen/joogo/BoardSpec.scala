@@ -9,10 +9,11 @@ import org.specs2.mutable._
  */
 class BoardSpec extends Specification {
 
-  "A 0x0 board" should {
+  "Board dimensions smaller than 2" should {
 
     "be disallowed" in {
-      new Board(0, 0) must throwA[IllegalArgumentException]
+      new Board(0, 0) must throwA [IllegalArgumentException]
+      new Board(1, 1) must throwA [IllegalArgumentException]
     }
 
   }
@@ -56,7 +57,7 @@ class BoardSpec extends Specification {
     val board = new Board(13)
 
     "have 5 hoshi: 4x4, 10x4, 4x10, 10x10 and 7x7" in {
-      board.hoshi must_== Set(Coords(4,4), Coords(10,4), Coords(4,10), Coords(10,10), Coords(7,7))
+      board.hoshi must_== Set(Coords(4, 4), Coords(10, 4), Coords(4, 10), Coords(10, 10), Coords(7, 7))
     }
 
   }
@@ -66,7 +67,7 @@ class BoardSpec extends Specification {
     val board = new Board(15, 9)
 
     "have 5 hoshi: 2x2, 13x2, 2x7, 13x7 and 8x5" in {
-      board.hoshi must_== Set(Coords(3, 3), Coords(13, 3), Coords(3, 7), Coords(13, 7), Coords(8,5))
+      board.hoshi must_== Set(Coords(3, 3), Coords(13, 3), Coords(3, 7), Coords(13, 7), Coords(8, 5))
     }
 
   }

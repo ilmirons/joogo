@@ -43,14 +43,15 @@ case class Board private(intersections:     Seq[Seq[Option[Color]]],
   def apply(p: Play): Board = play(p)
 
   /**
-   * Checks whether the coordinates are legal.
+   * @return Whether the coordinates are legal.
    */
   def canGet(pos: Coords): Boolean = (pos.x >= 1 && pos.y >= 1 && pos.x <= width && pos.y <= height)
 
   def canPlay(c: Color, x: Int, y: Int): Boolean = canPlay(c to (x, y))
 
   /**
-   * Checks that it is the right color's turn and that the intersection is empty.
+   * Checks that it is the right color's turn, that the intersection is empty,
+   * that the stone is left alive after the move and that the intersection is not under ko.
    */
   def canPlay(move: Move): Boolean = {
     // The correct color must be in turn.
@@ -64,14 +65,14 @@ case class Board private(intersections:     Seq[Seq[Option[Color]]],
   }
 
   /**
-   * Returns a group graph (intersections as keys, neighbors as values) for the stone group or
+   * @return A group graph (intersections as keys, neighbors as values) for the stone group or
    * connected empty territory at the given position.
    */
   private def componentAt(pos: Coords): Set[Coords] = {
     require(canGet(pos))
 
     /**
-     * Builds a graph of all stones of the given color (or empty intersections if given None).
+     * @return A graph of all stones of the given color (or empty intersections if given None).
      * Coordinates as keys, neighbor coordinates as values.
      */
     def boardGraph(intersectionType: Option[Color]): Map[Coords, Set[Coords]] = {
@@ -84,7 +85,7 @@ case class Board private(intersections:     Seq[Seq[Option[Color]]],
     }
 
     /**
-     * Accumulates group or territory members with breadth-first search.
+     * @return Group or territory members accumulated with breadth-first search.
      */
     @tailrec
     def buildComponent(graph:     Map[Coords, Set[Coords]],
@@ -109,14 +110,16 @@ case class Board private(intersections:     Seq[Seq[Option[Color]]],
   }
 
   /**
-   * Inverts color in turn and resets ko. Can be used to pass a turn.
+   * Can be used to pass a turn.
+   *
+   * @return Board with turn color inverted and ko reset.
    */
   private def endTurn: Board = copy(whoseTurn = whoseTurn.invert, koPosition = None)
 
   def get(x: Int, y: Int): Option[Color] = get(Coords(x, y))
 
   /**
-   * Gets the intersection at the given position.
+   * @return The intersection at the given position. None indicates an empty intersection.
    */
   def get(pos: Coords): Option[Color] = {
     require(canGet(pos))
@@ -124,7 +127,7 @@ case class Board private(intersections:     Seq[Seq[Option[Color]]],
   }
 
   /**
-   * Returns the board graph component for the stone group at the given position.
+   * @return The board graph component for the stone group at the given position.
    */
   def groupAt(pos: Coords): Set[Coords] = {
     require(get(pos).isDefined)
@@ -132,12 +135,15 @@ case class Board private(intersections:     Seq[Seq[Option[Color]]],
   }
 
   /**
-   * Returns all groups of the given color. Groups are sets of connected coordinates with stones of the same color.
+   * @return All groups of the given color. Groups are sets of connected coordinates with stones of the same color.
    */
   def groups(c: Color): Set[Set[Coords]] = {
     components(Some(c))
   }
 
+  /**
+   * @return The set of hoshi (star point) positions on this board.
+   */
   def hoshi: Set[Coords] = {
     // Center of the board.
     val tengen = Coords(width / 2 + 1, height / 2 + 1)
@@ -164,19 +170,34 @@ case class Board private(intersections:     Seq[Seq[Option[Color]]],
     }
 
     // When to add which hoshi type: tengen at 5x5, corners at 9x9, sides at 17x17.
+    // Hoshi are defined only for boards with uneven width and height.
     if (Set(width, height).forall(_ % 2 == 1)) {
-      if      (smallestBoardDimension >= 17) cornerHoshi(fromEdgeToHoshi) ++ sideHoshi(fromEdgeToHoshi) + tengen
-      else if (smallestBoardDimension >= 9)  cornerHoshi(fromEdgeToHoshi) + tengen
-      else if (smallestBoardDimension >= 5)  Set(tengen)
-      else Set.empty
+
+      smallestBoardDimension match {
+        // Corners, sides and tengen for large boards.
+        case l if l >= 17
+          => cornerHoshi(fromEdgeToHoshi) ++ sideHoshi(fromEdgeToHoshi) + tengen
+        // Corners and tengen for medium boards.
+        case m if m >= 9
+          => cornerHoshi(fromEdgeToHoshi) + tengen
+        // Only tengen for small boards.
+        case s if s >= 5
+          => Set(tengen)
+        // None for very small boards.
+        case _
+          => Set.empty
+      }
     }
     else Set.empty
   }
 
+  /**
+   * @return The amount of empty intersections surrounding the given position.
+   */
   def liberties(pos: Coords): Int = neighbors(pos) count (_ isEmpty)
 
   /**
-   * Returns the coordinates for all neighbor intersections of the given position.
+   * @return The coordinates for all neighbor intersections of the given position.
    */
   def neighborCoords(pos: Coords): Seq[Coords] = {
     // Coordinate differences for neighboring intersections in four directions: left, right, up, down.
@@ -186,7 +207,7 @@ case class Board private(intersections:     Seq[Seq[Option[Color]]],
   }
 
   /**
-   * Returns all neighboring intersections for the given position – may contain empty intersections.
+   * @return All neighboring intersections for the given position – may contain empty intersections.
    */
   def neighbors(pos: Coords): Seq[Option[Color]] = {
     require(canGet(pos))
@@ -194,7 +215,7 @@ case class Board private(intersections:     Seq[Seq[Option[Color]]],
   }
 
   /**
-   * Returns the coordinates for all neighbor stones of the given position with the given color.
+   * @return Coordinates for all neighbor stones of the given position with the given color.
    */
   def neighborStoneCoords(pos: Coords, c: Color): Seq[Coords] = {
     require(canGet(pos))
@@ -202,7 +223,7 @@ case class Board private(intersections:     Seq[Seq[Option[Color]]],
   }
 
   /**
-   * Counts how many stones of the given color are on the board.
+   * @return How many stones of the given color are on the board.
    */
   def numStones(c: Color): Int = {
     allCoords.filter(get(_).isDefined).count(get(_).get == c)
@@ -254,7 +275,7 @@ case class Board private(intersections:     Seq[Seq[Option[Color]]],
   }
 
   /**
-   * Removes all captured groups of the given color.
+   * @return Board with all captured groups of the given color removed.
    */
   private def removeCapturedGroups(c: Color): Board = {
     var operatedBoard = copy()
@@ -281,14 +302,14 @@ case class Board private(intersections:     Seq[Seq[Option[Color]]],
   }
 
   /**
-   * Returns all encircled territories that have only stones of the given color as neighbors.
+   * @return All encircled territories that have only stones of the given color as neighbors.
    */
   def territories(c: Color): Set[Set[Coords]] = {
     components(None).filter(_.forall(neighborStoneCoords(_, c.invert).isEmpty))
   }
 
   /**
-   * Returns the board graph component for the empty territory at the given position.
+   * @return The board graph component for the empty territory at the given position.
    */
   def territoryAt(pos: Coords): Set[Coords] = {
     require(!get(pos).isDefined)
@@ -304,7 +325,7 @@ case class Board private(intersections:     Seq[Seq[Option[Color]]],
   }
 
   /**
-   * Tests whether the group at pos has any liberties.
+   * @return Whether the group at pos has any liberties.
    */
   def isAlive(pos: Coords): Boolean = {
     groupAt(pos).exists(liberties(_) > 0)
@@ -315,7 +336,7 @@ case class Board private(intersections:     Seq[Seq[Option[Color]]],
 object Board {
 
   def emptyIntersections(width: Int, height: Int): Seq[Seq[Option[Color]]] = {
-    require(width > 0 && height > 0)
+    require(width > 1 && height > 1)
     Vector.fill(height, width)(None)
   }
 
