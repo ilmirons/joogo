@@ -40,6 +40,8 @@ case class Board private(intersections:     Seq[Seq[Option[Color]]],
 
   def allCoords: Seq[Coords] = for (x <- 1 to width; y <- 1 to height) yield Coords(x, y)
 
+  def apply(p: Play): Board = play(p)
+
   /**
    * Checks whether the coordinates are legal.
    */

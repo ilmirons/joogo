@@ -128,7 +128,7 @@ class BoardSpec extends Specification {
     }
 
     "have white next in turn after a pass" in {
-      board.play(Black pass).whoseTurn must_== White
+      board(Black pass).whoseTurn must_== White
     }
 
     "have only empty neighbors for every intersection" in {
@@ -166,7 +166,7 @@ class BoardSpec extends Specification {
   "Playing the first stone on an empty board" should {
 
     val emptyBoard = new Board(9, 7)
-    val board      = emptyBoard.play(1, 2)
+    val board      = emptyBoard(Black to (1, 2))
     val neighbors  = Seq(Coords(1, 1), Coords(2, 2), Coords(1,3))
 
     "make a black stone retrievable from the position" in {
@@ -207,7 +207,7 @@ class BoardSpec extends Specification {
 
   "Taking the last liberty from a single black stone in a corner" should {
 
-    val board = new Board(9, 7).play(1, 1).play(1, 2).play(Black pass).play(2, 1)
+    val board = new Board(9, 7) (Black to (1, 1)) (White to (1, 2)) (Black pass) (White to (2, 1))
 
     "make it disappear from the board string" in {
       board.toString must_==
@@ -231,7 +231,7 @@ class BoardSpec extends Specification {
 
   "Taking the last liberty from a single white stone in the center" should {
 
-    val board = new Board(9, 7).play(5, 3).play(5, 4).play(5, 5).play(White pass).play(4, 4).play(White pass).play(6, 4)
+    val board = new Board(9, 7) (Black to (5, 3)) (White to (5, 4)) (Black to (5, 5)) (White pass) (Black to (4, 4)) (White pass) (Black to (6, 4))
 
     "make it disappear from the board string" in {
       board.toString must_==
@@ -256,18 +256,18 @@ class BoardSpec extends Specification {
 
   "A board with a lonely black diamond where white tries to play inside the diamond" should {
 
-    val board = new Board(9, 7).play(5, 3).play(White pass).play(5, 5).play(White pass).play(4, 4).play(White pass).play(6, 4).play(5, 4)
+    val board = new Board(9, 7) (Black to (5, 3)) (White pass) (Black to (5, 5)) (White pass) (Black to (4, 4)) (White pass) (Black to (6, 4)) (White to (5, 4))
 
     "keep white still in turn" in {
       board.whoseTurn must_== White
     }
 
     "disallow playing a white stone inside the diamond eye" in {
-      board.canPlay(White, 5, 4) must beFalse
+      board.canPlay(White to (5, 4)) must beFalse
     }
 
     "allow playing a black stone inside the diamond eye" in {
-      board.play(White pass).canPlay(Black, 5, 4) must beTrue
+      board(White pass).canPlay(Black to (5, 4)) must beTrue
     }
 
     "not add white stones to the board string" in {
@@ -282,20 +282,21 @@ class BoardSpec extends Specification {
 
   "A board with a surrounded white diamond" should {
 
-    val board = new Board(5, 5).play(3, 2).play(3, 1).play(2, 3).play(2, 2).play(3, 4).play(1, 3).play(4, 3).play(2, 4).play(Black pass).play(3, 5).play(Black pass).play(4, 4).play(Black pass).play(5, 3).play(Black pass).play(4, 2)
+    val board = new Board(5, 5)(Black to (3, 2))(White to (3, 1))(Black to (2, 3))(White to (2, 2))(Black to (3, 4))(White to (1, 3))(Black to (4, 3))(White to (2, 4))(Black pass)(White to(3, 5))(Black pass)(White to (4, 4))(Black pass)(White to (5, 3))(Black pass)(White to (4, 2))
 
     "disallow playing a white stone that takes its own group's last liberty" in {
-      board.canPlay(Black, 3, 3) must beFalse
-      board.play(3, 3).whoseTurn must_== Black
-      board.play(3, 3).capturesForColors(Black) must_== 0
-      board.play(3, 3).capturesForColors(White) must_== 0
+      val forcePlay = board(Black to (3, 3))
+      board.canPlay(Black to (3, 3)) must beFalse
+      forcePlay.whoseTurn must_== Black
+      forcePlay.capturesForColors(Black) must_== 0
+      forcePlay.capturesForColors(White) must_== 0
     }
 
   }
 
   "Taking the last liberty from a white two-stone group" should {
 
-    val board = new Board(9, 7).play(3, 4).play(4, 4).play(4, 3).play(5, 4).play(5,3).play(White pass).play(6, 4).play(White pass).play(4, 5).play(White pass).play(5,5)
+    val board = new Board(9, 7)(Black to (3, 4))(White to (4, 4))(Black to (4, 3))(White to (5, 4))(Black to (5, 3))(White pass)(Black to (6, 4))(White pass)(Black to (4, 5))(White pass)(Black to (5, 5))
 
     "make it disappear from the board string" in {
 
@@ -322,30 +323,28 @@ class BoardSpec extends Specification {
 
   "Filling a 3x3 board with a black one-eyed group" should {
 
-    val board = new Board(3, 3).play(1, 1).play(White pass).play(2, 1).play(White pass).play(3, 1).play(White pass)
-                               .play(1, 2).play(White pass).play(2, 2).play(White pass).play(3, 2).play(White pass)
-                               .play(1, 3).play(White pass).play(2, 3)
+    val board = new Board(3, 3) (Black to (1, 1)) (White pass) (Black to (2, 1)) (White pass) (Black to (3, 1)) (White pass) (Black to (1, 2)) (White pass) (Black to (2, 2)) (White pass) (Black to (3, 2)) (White pass) (Black to (1, 3)) (White pass) (Black to (2, 3))
 
     "allow playing a white stone inside the eye" in {
-      board.canPlay(White, 3, 3) must beTrue
+      board.canPlay(White to (3, 3)) must beTrue
     }
 
     "update the board string accordingly after capture" in {
-      board.play(3, 3).toString must_==
+      board(White to (3, 3)).toString must_==
       "+++\n" +
       "+++\n" +
       "++w\n"
     }
 
     "make white player's captured count equal board size - 1 after capture" in {
-      board.play(3, 3).capturesForColors(White) must_== board.width * board.height - 1
+      board(White to (3, 3)).capturesForColors(White) must_== board.width * board.height - 1
     }
 
   }
 
   "Taking the last liberty from a single stone whose group still has liberties" should {
 
-    val board = new Board(3, 3).play(1, 1).play(2, 2).play(1, 2).play(1, 3)
+    val board = new Board(3, 3) (Black to (1, 1)) (White to (2, 2)) (Black to (1, 2)) (White to (1, 3))
 
     "keep the group in the board string" in {
       board.toString must_==
@@ -358,7 +357,7 @@ class BoardSpec extends Specification {
 
   "Taking the last liberty from a single stone on a board with multiple groups of the same color" should {
 
-    val board = new Board(3, 3).play(1, 1).play(White pass).play(3, 1).play(White pass).play(1, 3).play(White pass).play(3, 3).play(3, 2).play(Black pass).play(2, 3)
+    val board = new Board(3, 3) (Black to (1, 1)) (White pass) (Black to (3, 1)) (White pass) (Black to (1, 3)) (White pass) (Black to (3, 3)) (White to (3, 2)) (Black pass) (White to (2, 3))
 
     "update the board string accordingly" in {
       board.toString must_==
@@ -371,22 +370,23 @@ class BoardSpec extends Specification {
 
   "White player capturing a ko" should {
 
-    val board = new Board(4, 3).play(2, 1).play(3, 1).play(1, 2).play(4, 2).play(2, 3).play(3, 3).play(3, 2).play(2, 2)
+    val board = new Board(4, 3) (Black to (2, 1)) (White to (3, 1)) (Black to (1, 2)) (White to (4, 2)) (Black to (2, 3)) (White to (3, 3)) (Black to (3, 2)) (White to (2, 2))
 
     "disallow playing a black stone that recaptures the ko" in {
-      board.play(3, 2).capturesForColors(Black) must_== 0
-      board.play(3, 2).whoseTurn must_== Black
+      val illegalKoCapture = board(Black to (3, 2))
+      illegalKoCapture.capturesForColors(Black) must_== 0
+      illegalKoCapture.whoseTurn must_== Black
     }
 
   }
 
   "An empty corner intersection with zero liberties and with neighboring black and white stones with liberties" should {
 
-    val board = new Board(2, 2).play(1, 1).play(2, 2)
+    val board = new Board(2, 2) (Black to (1, 1)) (White to (2, 2))
 
     "allow playing black or white in the corner" in {
-      board.play(1, 2).get(1, 2).get must_== Black
-      board.play(Black pass).play(1, 2).get(1, 2).get must_== White
+      board(Black to (1, 2)).get(1, 2).get must_== Black
+      board(Black pass)(White to (1, 2)).get(1, 2).get must_== White
     }
 
   }
