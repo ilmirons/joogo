@@ -1,7 +1,7 @@
 package com.github.joonasrouhiainen.joogo
 
 import org.specs2.mutable._
-import com.github.joonasrouhiainen.joogo.model.{Board, Coords}
+import com.github.joonasrouhiainen.joogo.model._
 
 /**
  * Unit tests for Board.
