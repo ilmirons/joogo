@@ -132,7 +132,7 @@ class BoardSpec extends Specification {
     }
 
     "have only empty neighbors for every intersection" in {
-      board.allCoords.foreach(board.neighbors(_).foreach(_.isEmpty must beTrue))
+      board.allCoords.foreach(board.neighbors(_).foreach(_ must beNone))
     }
 
     "have a neighbor count of 4 for all intersections not near the edges" in {
@@ -185,7 +185,7 @@ class BoardSpec extends Specification {
     }
 
     "leave the original board state untouched" in {
-      emptyBoard.get(1, 2).isEmpty must beTrue
+      emptyBoard.get(1, 2) must beNone
     }
 
     "make it white's turn" in {
@@ -221,7 +221,7 @@ class BoardSpec extends Specification {
     }
 
     "make it unretrievable from the position" in {
-      board.get(1, 1).isEmpty must beTrue
+      board.get(1, 1) must beNone
     }
 
     "make white player's captured count 1" in {
@@ -245,7 +245,7 @@ class BoardSpec extends Specification {
     }
 
     "make it unretrievable from the position" in {
-      board.get(5, 4).isEmpty must beTrue
+      board.get(5, 4) must beNone
     }
 
     "make black player's captured count 1" in {
@@ -275,7 +275,7 @@ class BoardSpec extends Specification {
     }
 
     "keep the diamond eye empty" in {
-      board.get(5, 4).isEmpty must beTrue
+      board.get(5, 4) must beNone
     }
 
   }
@@ -311,8 +311,8 @@ class BoardSpec extends Specification {
     }
 
     "make it unretrievable from the position" in {
-      board.get(4, 4).isEmpty must beTrue
-      board.get(5, 4).isEmpty must beTrue
+      board.get(4, 4) must beNone
+      board.get(5, 4) must beNone
     }
 
     "make black player's captured count 2" in {
