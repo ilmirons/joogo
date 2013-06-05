@@ -2,7 +2,7 @@ package com.github.joonasrouhiainen.joogo
 
 // All possible outcomes of a finished game.
 
-abstract class Result(winner: Option[Color])
+abstract sealed class Result(winner: Option[Color])
 
 case class Draw(scoresForColors: Map[Color, Float]) extends Result(None) {
   override def toString = "Draw"

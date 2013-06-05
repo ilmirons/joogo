@@ -36,7 +36,7 @@ case class Game private(players: Map[Color, Option[Player]], boardStates: Seq[Bo
     val passingWillEndGame = moveNumber >= 2 && board.intersections == boardStates(1).intersections
 
     if (passingWillEndGame) copy(result = Some(chineseScore))
-    else withMove(board.endTurn)
+    else withMove(board.play(board.whoseTurn.pass))
   }
 
   def play(x: Int, y: Int): Game = play(Coords(x, y))
@@ -44,14 +44,14 @@ case class Game private(players: Map[Color, Option[Player]], boardStates: Seq[Bo
   def play(coords: Coords): Game = {
     require(!isFinished)
     ensurePlayerPresent(whoseTurn)
-    if (board.canPlay(whoseTurn, coords)) {
-      withMove(board.play(coords))
+    if (board.canPlay(whoseTurn to coords)) {
+      withMove(board.play(whoseTurn to coords))
     }
     else copy()
   }
 
   def resign: Game = {
-    copy(result = Some(whoseTurn.resigned))
+    copy(result = Some(whoseTurn resigned))
   }
 
   def chineseScore: Result = {

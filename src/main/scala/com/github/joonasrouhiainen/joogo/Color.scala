@@ -9,21 +9,25 @@ sealed trait Color {
 
   implicit def color2string(c: Color) = c.toString
 
-  def invert: Color = this match {
-    case Black => White
-    case White => Black
-  }
+  def invert: Color
 
-  def resigned: Result = new Resigned(this.invert)
+  def resigned: Result = new Resigned(invert)
 
-  override def toString: String = this match {
-    case Black => "b"
-    case White => "w"
-  }
+  def pass: Pass = new Pass(this)
+
+  def to(coords: Coords): Move = new Move(this, coords)
+  def to(x: Int, y: Int): Move = to(Coords(x, y))
 
   def wonByScore(scoresForColors: Map[Color, Float]): Result = new WonByScore(this, scoresForColors)
 
 }
 
-case object Black extends Color
-case object White extends Color
+case object Black extends Color {
+  def invert = White
+  override def toString = "b"
+}
+
+case object White extends Color {
+  def invert = Black
+  override def toString = "w"
+}

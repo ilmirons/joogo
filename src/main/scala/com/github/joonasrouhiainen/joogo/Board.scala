@@ -45,20 +45,20 @@ case class Board private(intersections:     Seq[Seq[Option[Color]]],
    */
   def canGet(pos: Coords): Boolean = (pos.x >= 1 && pos.y >= 1 && pos.x <= width && pos.y <= height)
 
-  def canPlay(c: Color, x: Int, y: Int): Boolean = canPlay(c, Coords(x, y))
+  def canPlay(c: Color, x: Int, y: Int): Boolean = canPlay(c to (x, y))
 
   /**
    * Checks that it is the right color's turn and that the intersection is empty.
    */
-  def canPlay(c: Color, pos: Coords): Boolean = {
+  def canPlay(move: Move): Boolean = {
     // The correct color must be in turn.
-    whoseTurn == c &&
+    whoseTurn == move.color &&
     // The intersection must be empty.
-    get(pos).isEmpty &&
+    get(move.pos).isEmpty &&
     // A stone at the intersection must be alive after removing the groups it captures.
-    replace(Some(c), pos).removeCapturedGroups(c.invert).isAlive(pos) &&
+    replace(Some(move.color), move.pos).removeCapturedGroups(move.color.invert).isAlive(move.pos) &&
     // The intersection must not be under ko.
-    !(koPosition.isDefined && koPosition.get == pos)
+    !(koPosition.isDefined && koPosition.get == move.pos)
   }
 
   /**
@@ -109,7 +109,7 @@ case class Board private(intersections:     Seq[Seq[Option[Color]]],
   /**
    * Inverts color in turn and resets ko. Can be used to pass a turn.
    */
-  def endTurn: Board = copy(whoseTurn = whoseTurn.invert, koPosition = None)
+  private def endTurn: Board = copy(whoseTurn = whoseTurn.invert, koPosition = None)
 
   def get(x: Int, y: Int): Option[Color] = get(Coords(x, y))
 
@@ -207,18 +207,27 @@ case class Board private(intersections:     Seq[Seq[Option[Color]]],
   }
 
   def play(x: Int, y: Int): Board = play(Coords(x, y))
+  def play(pos: Coords):    Board = play(whoseTurn to pos)
 
   /**
+   * Handles plays (moves and passes).
    * If placement is possible, returns a clone of the board with a new stone at given position and with the other player in turn.
    * If placement is not possible, returns a clone of the current board without ending the turn.
    */
-  def play(pos: Coords): Board = {
-    if (!canPlay(whoseTurn, pos)) {
+  def play(p: Play): Board = {
+    p match {
+      case m: Move => playMove(m)
+      case p: Pass => endTurn
+    }
+  }
+
+  def playMove(move: Move): Board = {
+    if (!canPlay(move)) {
       copy()
     }
     else {
       // Put the stone in place, remove captured groups and invert turn
-      val boardForNextTurn = replace(Some(whoseTurn), pos).removeCapturedGroups(whoseTurn invert).endTurn
+      val boardForNextTurn = replace(Some(whoseTurn), move.pos).removeCapturedGroups(whoseTurn invert).endTurn
 
       // Mark ko position if needed.
 
@@ -227,8 +236,8 @@ case class Board private(intersections:     Seq[Seq[Option[Color]]],
 
         // See what will be captured by this move: get the first stone of the intersection of the play coordinates'
         // neighborhood before and after this move
-        val neighborsNow  = neighborStoneCoords(pos, whoseTurn.invert)
-        val neighborsNext = boardForNextTurn.neighborStoneCoords(pos, whoseTurn.invert)
+        val neighborsNow  = neighborStoneCoords(move.pos, whoseTurn.invert)
+        val neighborsNext = boardForNextTurn.neighborStoneCoords(move.pos, whoseTurn.invert)
         val singleCapturedPosition = neighborsNow.diff(neighborsNext)(0)
 
         // If the opponent could play back at the captured position to capture exactly one stone (if ko was not set)
