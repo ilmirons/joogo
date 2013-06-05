@@ -1,4 +1,4 @@
-package com.github.joonasrouhiainen.joogo
+package com.github.joonasrouhiainen.joogo.model
 
 abstract sealed class Play(col: Color) {
   def color = col

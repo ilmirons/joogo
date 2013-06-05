@@ -1,7 +1,8 @@
-package com.github.joonasrouhiainen.joogo
+package com.github.joonasrouhiainen.joogo.model
 
 import scala._
 import scala.annotation.tailrec
+import scala.Some
 
 /**
  * Represents a rectangular go board with a minimum size of 1x1.

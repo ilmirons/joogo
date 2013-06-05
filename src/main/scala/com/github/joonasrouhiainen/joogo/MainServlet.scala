@@ -1,5 +1,8 @@
 package com.github.joonasrouhiainen.joogo
 
+import com.github.joonasrouhiainen.joogo.model._
+import com.github.joonasrouhiainen.joogo.data.RuntimeGameStorage
+
 class MainServlet extends JoogoStack {
 
   val storage = new RuntimeGameStorage

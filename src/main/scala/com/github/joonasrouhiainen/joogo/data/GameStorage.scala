@@ -1,4 +1,6 @@
-package com.github.joonasrouhiainen.joogo
+package com.github.joonasrouhiainen.joogo.data
+
+import com.github.joonasrouhiainen.joogo.model.Game
 
 trait GameStorage {
 

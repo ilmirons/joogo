@@ -1,4 +1,4 @@
-package com.github.joonasrouhiainen.joogo
+package com.github.joonasrouhiainen.joogo.model
 
 /**
  * Represents a go stone color.

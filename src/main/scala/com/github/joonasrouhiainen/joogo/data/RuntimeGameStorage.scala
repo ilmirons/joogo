@@ -1,6 +1,7 @@
-package com.github.joonasrouhiainen.joogo
+package com.github.joonasrouhiainen.joogo.data
 
 import scala.util.Random
+import com.github.joonasrouhiainen.joogo.model.Game
 
 class RuntimeGameStorage extends GameStorage {
 

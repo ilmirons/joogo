@@ -1,6 +1,8 @@
 package com.github.joonasrouhiainen.joogo
 
 import org.specs2.mutable.Specification
+import com.github.joonasrouhiainen.joogo.model.{Player, Game, Coords}
+import com.github.joonasrouhiainen.joogo.data.{RuntimeGameStorage, GameStorage}
 
 /**
  * Unit tests for GameStorage.

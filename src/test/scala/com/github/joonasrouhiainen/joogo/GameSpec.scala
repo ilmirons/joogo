@@ -1,6 +1,7 @@
 package com.github.joonasrouhiainen.joogo
 
 import org.specs2.mutable._
+import com.github.joonasrouhiainen.joogo.model.{Draw, Player, Coords, Game}
 
 class GameSpec extends Specification {
 

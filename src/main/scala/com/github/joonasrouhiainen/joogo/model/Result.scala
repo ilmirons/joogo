@@ -1,4 +1,5 @@
-package com.github.joonasrouhiainen.joogo
+package com.github.joonasrouhiainen.joogo.model
+
 
 // All possible outcomes of a finished game.
 

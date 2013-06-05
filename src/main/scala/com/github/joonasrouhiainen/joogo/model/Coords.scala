@@ -1,4 +1,4 @@
-package com.github.joonasrouhiainen.joogo
+package com.github.joonasrouhiainen.joogo.model
 
 /**
  * Wrapper for two-dimensional board coordinates.
