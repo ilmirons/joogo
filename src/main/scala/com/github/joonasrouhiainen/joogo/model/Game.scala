@@ -1,30 +1,22 @@
 package com.github.joonasrouhiainen.joogo.model
 
 /**
- * A game of go with chinese rules.
+ * A game of go with chinese rules and two players.
  *
  * @author Joonas Rouhiainen
  */
-case class Game private(players: Map[Color, Option[Player]], boardStates: Seq[Board], result: Option[Result]) {
+case class Game private(players: Map[Color, Player], boardStates: Seq[Board], result: Option[Result]) {
 
-  def this(boardWidth: Int, boardHeight: Int) {
-    this(Map(Black -> None, White -> None), Seq(new Board(boardWidth, boardHeight)), None)
+  require(players.size == 2)
+
+  def this(boardWidth: Int, boardHeight: Int, players: Map[Color, Player]) {
+    this(players, Seq(new Board(boardWidth, boardHeight)), None)
   }
-
-  def this(boardSize: Int) {
-    this(boardSize, boardSize)
-  }
-
-  def addPlayer(color: Color, player: Player): Game = copy(players = players + (color -> Option(player)))
 
   /**
    * Returns the newest board state.
    */
   def board: Board = boardStates.head
-
-  private def ensurePlayerPresent(color: Color): Unit = {
-    if (players(color).isEmpty) throw new NoPlayerException
-  }
 
   def isFinished: Boolean = result.isDefined
 
@@ -32,7 +24,6 @@ case class Game private(players: Map[Color, Option[Player]], boardStates: Seq[Bo
 
   def pass: Game = {
     require(!isFinished)
-    ensurePlayerPresent(whoseTurn)
     val passingWillEndGame = moveNumber >= 2 && board.intersections == boardStates(1).intersections
 
     if (passingWillEndGame) copy(result = Some(chineseScore))
@@ -43,7 +34,6 @@ case class Game private(players: Map[Color, Option[Player]], boardStates: Seq[Bo
 
   def play(coords: Coords): Game = {
     require(!isFinished)
-    ensurePlayerPresent(whoseTurn)
     if (board.canPlay(whoseTurn to coords)) {
       withMove(board.play(whoseTurn to coords))
     }
@@ -70,5 +60,3 @@ case class Game private(players: Map[Color, Option[Player]], boardStates: Seq[Bo
   private def withMove(boardState: Board): Game = copy(boardStates = boardStates.+:(boardState))
 
 }
-
-class NoPlayerException extends Exception

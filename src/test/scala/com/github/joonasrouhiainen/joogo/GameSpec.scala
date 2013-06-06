@@ -7,14 +7,14 @@ class GameSpec extends Specification {
 
   "A new game on a 19x19 board" should {
 
-    val game = new Game(19, 19)
+    val game = new Game(19, 19, Map(Black -> new Player("b"), White -> new Player("b")))
 
     "have a move number of 1" in {
       game.moveNumber must_== 1
     }
 
-    "have no players" in {
-      (game.players(Black) must_== None) and (game.players(White) must_== None)
+    "have two players" in {
+      game.players.size must_== 2
     }
 
     "be unfinished" in {
@@ -29,11 +29,12 @@ class GameSpec extends Specification {
       (game.board.width must_== 19) and (game.board.height must_== 19)
     }
 
-    "disallow playing moves or passing without players" in {
-      Seq(Black, White).foreach { color =>
-        game.play(Coords(1, 1)) must throwA[NoPlayerException]
-        game.pass must throwA[NoPlayerException]
-      }
+  }
+
+  "A new game with one player" should {
+
+    "be disallowed" in {
+      new Game(3, 3, Map(Black -> new Player("lonely"))) must throwA [IllegalArgumentException]
     }
 
   }
@@ -42,10 +43,10 @@ class GameSpec extends Specification {
 
     val black = new Player("b")
     val white = new Player("w")
-    val gameWithPlayers = new Game(3).addPlayer(Black, black).addPlayer(White, white)
+    val gameWithPlayers = new Game(3, 3, Map(Black -> black, White -> white))
 
     "make the players added to it retrievable" in {
-      (gameWithPlayers.players(Black) must_== Some(black)) and (gameWithPlayers.players(White) must_== Some(white))
+      (gameWithPlayers.players(Black) must_== black) and (gameWithPlayers.players(White) must_== white)
     }
 
     "allow black to make a valid pass" in {

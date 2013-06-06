@@ -7,13 +7,11 @@ class MainServlet extends JoogoStack {
 
   val storage = new RuntimeGameStorage
 
-  newGame(9, 9)
-
   def store(g: Game): String = storage.storeGame(g)
   def game(id: String): Option[Game] = storage.getGame(id)
 
-  def newGame(x: Int, y: Int): String = {
-    store(new Game(x, y).addPlayer(Black, new Player("black")).addPlayer(White, new Player("white")))
+  def newGame(x: Int, y: Int, players: Map[Color, Player]): String = {
+    store(new Game(x, y, players))
   }
 
   def serveCreation() = {
@@ -58,7 +56,9 @@ class MainServlet extends JoogoStack {
     if (params.get("x").isDefined && params.get("y").isDefined) {
       val x  = params("x").toInt
       val y  = params("y").toInt
-      val id = newGame(x, y)
+      val players: Map[Color, Player] = Map(Black -> new Player(params("b")), White -> new Player(params("w")))
+
+      val id = newGame(x, y, players)
       serveGame(id)
     }
   }

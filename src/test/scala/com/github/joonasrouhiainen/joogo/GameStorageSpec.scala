@@ -11,7 +11,7 @@ import com.github.joonasrouhiainen.joogo.data.{RuntimeGameStorage, GameStorage}
  */
 class GameStorageSpec extends Specification {
 
-  val game = new Game(9).addPlayer(Black, new Player("b")).addPlayer(White, new Player("w")).play(Coords(1, 1)).play(Coords(1, 1)).play(Coords(1, 2)).pass
+  val game = new Game(9, 9, Map(Black -> new Player("b"), White -> new Player("w"))).play(Coords(1, 1)).play(Coords(1, 1)).play(Coords(1, 2)).pass
 
   "A game data storage" should {
 
