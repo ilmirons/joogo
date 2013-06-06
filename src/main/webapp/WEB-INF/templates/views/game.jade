@@ -5,32 +5,44 @@
 - val board = game.board
 - val gameRoot = "/g/" + gameId
 
-h1 JooGo
-
-.container
-    .board
+.container-fluid
+  .row-fluid
+    .span3
+      .well.sidebar-nav
+        .nav.nav-list
+          li.nav-header = "Move " + game.moveNumber
+          li
+            | It is
+            strong = board.whoseTurn + "'s"
+            | turn. (that's you!)
+          li = if (game.isFinished) "Game over. Result: " + game.result.get + "."
+          li.nav-header Players
+          li = "Black: " + game.players(Black)
+          li = "White: " + game.players(White)
+          li.nav-header Captured
+          li = "Black: " + board.capturesForColors(Black)
+          li = "White: " + board.capturesForColors(White)
+    .span9
+      .board
         table
-            - for (y <- 1 to board.height)
-                - val rowClass = "row-" + y
-                tr(class={if (y == board.height) rowClass + " row-last" else rowClass})
-                    - for (x <- 1 to board.width)
-                        - val colClass = "col-" + x
-                        td(class={if (x == board.width) colClass + " col-last" else colClass})
-                            form(action=gameRoot method="POST")
-                                input(type="hidden" name="x" value={x})
-                                input(type="hidden" name="y" value={y})
-                                - val isHoshi    = board.hoshi.contains(new Coords(x, y))
-                                - val stoneColor = board.get(x, y)
-                                - val colorClass = if (stoneColor.isDefined) stoneColor.get else "empty" 
-                                button(type="submit" class={colorClass})
-                                    - if (isHoshi && !stoneColor.isDefined)
-                                        .hoshi
-
-p = "Move " + game.moveNumber + ". " + (if (game.isFinished) "Game over. Result: " + game.result.get + "." else board.whoseTurn + "'s turn.")
-p = "Captured stones: " + board.capturesForColors
-
-form(action={gameRoot + "/pass"} method="POST")
-    button(type="submit") Pass turn
-
-form(action={gameRoot + "/resign"} method="POST")
-    button(type="submit") Resign
+          - for (y <- 1 to board.height)
+            - val rowClass = "row-" + y
+            tr(class={if (y == board.height) rowClass + " row-last" else rowClass})
+              - for (x <- 1 to board.width)
+                - val colClass = "col-" + x
+                td(class={if (x == board.width) colClass + " col-last" else colClass})
+                  form(action=gameRoot method="POST")
+                    input(type="hidden" name="x" value={x})
+                    input(type="hidden" name="y" value={y})
+                      - val isHoshi    = board.hoshi.contains(new Coords(x, y))
+                      - val stoneColor = board.get(x, y)
+                      - val colorClass = if (stoneColor.isDefined) stoneColor.get else "empty" 
+                      button(type="submit" class={colorClass})
+                        - if (isHoshi && !stoneColor.isDefined)
+                          .hoshi
+  hr
+  .row-fluid.actions
+    form.span6(action={gameRoot + "/pass"} method="POST")
+      button.btn.btn-large(type="submit") Pass turn
+    form.span6(action={gameRoot + "/resign"} method="POST")
+      button.btn.btn-large(type="submit") Resign

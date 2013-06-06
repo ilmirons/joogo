@@ -5,9 +5,37 @@ html(lang="en")
   head
     title JooGo
     meta(charset="utf-8")
-    meta(name="viewport"    content="width=device-width initial-scale=1.0")
+    meta(name="viewport"    content="width=device-width, initial-scale=1.0")
     meta(name="description" content="Play go in your browser!")
     meta(name="author"      content="Joonas Rouhiainen")
-    link(rel="stylesheet" type="text/css" href="/compiled/styles.css")
+    link(rel="stylesheet" href="/bootstrap/css/bootstrap.css")
+    link(rel="stylesheet" href="/bootstrap/css/bootstrap-responsive.css")
+    link(rel="stylesheet" href="/compiled/styles.css")
   body
+    .navbar.navbar-inverse.navbar-fixed-top
+      .navbar-inner
+        .container-fluid
+          button.btn.btn-navbar(type="button" data-toggle="collapse" data-target=".nav-collapse")
+            span.icon-bar
+            span.icon-bar
+            span.icon-bar
+          a.brand(href="/") igoGS
+          .nav-collapse.collapse
+            p.navbar-text.pull-right Log in
+            ul.nav
+              li
+                a(href="/") Home
     != body
+    script(src="boostrap/js/jquery.js")
+    script(src="boostrap/js/bootstrap-transition.js")
+    script(src="boostrap/js/bootstrap-alert.js")
+    script(src="boostrap/js/bootstrap-modal.js")
+    script(src="boostrap/js/bootstrap-dropdown.js")
+    script(src="boostrap/js/bootstrap-scrollspy.js")
+    script(src="boostrap/js/bootstrap-tab.js")
+    script(src="boostrap/js/bootstrap-tooltip.js")
+    script(src="boostrap/js/bootstrap-popover.js")
+    script(src="boostrap/js/bootstrap-button.js")
+    script(src="boostrap/js/bootstrap-collapse.js")
+    script(src="boostrap/js/bootstrap-carousel.js")
+    script(src="boostrap/js/bootstrap-typeahead.js")
