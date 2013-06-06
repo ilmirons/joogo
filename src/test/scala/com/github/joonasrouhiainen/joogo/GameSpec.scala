@@ -83,6 +83,11 @@ class GameSpec extends Specification {
       twoPasses.board.whoseTurn must_== White
     }
 
+    "not allow resigning after the game already has another result" in {
+      val twoPasses = gameWithPlayers.pass.pass
+      twoPasses.resign must throwA [GameAlreadyFinishedException]
+    }
+
     "end the game with the correct result after one move and two passes" in {
       val oneBlackAndPassPass = gameWithPlayers.move(2, 2).pass.pass
       val allPoints = oneBlackAndPassPass.board.width * oneBlackAndPassPass.board.height

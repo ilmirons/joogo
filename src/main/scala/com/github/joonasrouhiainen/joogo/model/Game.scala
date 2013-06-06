@@ -62,6 +62,7 @@ case class Game private(boardWidth: Int, boardHeight: Int, players: Map[Color, P
   }
 
   def resign: Game = {
+    if (result isDefined) throw new GameAlreadyFinishedException
     copy(result = Some(whoseTurn resigned))
   }
 
@@ -79,3 +80,5 @@ case class Game private(boardWidth: Int, boardHeight: Int, players: Map[Color, P
   def whoseTurn: Color = board.whoseTurn
 
 }
+
+class GameAlreadyFinishedException extends Exception
