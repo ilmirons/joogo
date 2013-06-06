@@ -45,6 +45,12 @@ class GameSpec extends Specification {
     val white = new Player("w")
     val gameWithPlayers = new Game(3, 3, Map(Black -> black, White -> white))
 
+    "disallow fetching move numbers that are zero, negative or over current move number" in {
+      gameWithPlayers.boardOnMove(0) must throwA[IllegalArgumentException]
+      gameWithPlayers.boardOnMove(-3) must throwA[IllegalArgumentException]
+      gameWithPlayers.boardOnMove(gameWithPlayers.moveNumber + 1) must throwA[IllegalArgumentException]
+    }
+
     "make the players added to it retrievable" in {
       (gameWithPlayers.players(Black) must_== black) and (gameWithPlayers.players(White) must_== white)
     }
@@ -57,10 +63,9 @@ class GameSpec extends Specification {
     }
 
     "allow making a black move that updates the move number and adds the stone" in {
-      val oneMove = gameWithPlayers.play(2, 2)
+      val oneMove = gameWithPlayers.move(2, 2)
       oneMove.moveNumber must_== 2
       oneMove.board.get(2, 2).get must_== Black
-      oneMove.boardStates.size must_== 2
     }
 
     "allow players to resign" in {
@@ -79,7 +84,7 @@ class GameSpec extends Specification {
     }
 
     "end the game with the correct result after one move and two passes" in {
-      val oneBlackAndPassPass = gameWithPlayers.play(2, 2).pass.pass
+      val oneBlackAndPassPass = gameWithPlayers.move(2, 2).pass.pass
       val allPoints = oneBlackAndPassPass.board.width * oneBlackAndPassPass.board.height
       val result = oneBlackAndPassPass.result.get
 
@@ -89,7 +94,7 @@ class GameSpec extends Specification {
     }
 
     "end the game with the correct result when both players have encircled one point of territory and passed" in {
-      val cornerForBoth = gameWithPlayers.play(1, 2).play(3, 2).play(2, 1).play(2, 3).pass.pass
+      val cornerForBoth = gameWithPlayers.move(1, 2).move(3, 2).move(2, 1).move(2, 3).pass.pass
       val result = cornerForBoth.result.get
 
       cornerForBoth.isFinished must beTrue
@@ -98,8 +103,8 @@ class GameSpec extends Specification {
     }
 
     "should not react to illegal moves" in {
-      val oneMove = gameWithPlayers.play(1, 1)
-      val twoMovesAtSameIntersection = oneMove.play(1, 1)
+      val oneMove = gameWithPlayers.move(1, 1)
+      val twoMovesAtSameIntersection = oneMove.move(1, 1)
       twoMovesAtSameIntersection must_== oneMove
     }
 

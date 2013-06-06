@@ -11,7 +11,7 @@ import com.github.joonasrouhiainen.joogo.data.{RuntimeGameStorage, GameStorage}
  */
 class GameStorageSpec extends Specification {
 
-  val game = new Game(9, 9, Map(Black -> new Player("b"), White -> new Player("w"))).play(Coords(1, 1)).play(Coords(1, 1)).play(Coords(1, 2)).pass
+  val game = new Game(9, 9, Map(Black -> new Player("b"), White -> new Player("w"))).play(Black to (1, 1)).play(White to (1, 1)).play(Black to (1, 2)).pass
 
   "A game data storage" should {
 
@@ -37,15 +37,14 @@ class GameStorageSpec extends Specification {
 
   }
 
-  "Playing moves to a game and storing the game in between" should {
+  "Playing a move to a game and storing the game in between" should {
 
     val storage: GameStorage = new RuntimeGameStorage
 
     "not change the game's id in storage" in {
-      val firstId = storage.storeGame(game)
-      storage.storeGame(game.play(3, 3))
-      val lastId = storage.storeGame(game.play(4, 4))
-      firstId must_== lastId
+      val firstId  = storage.storeGame(game)
+      val secondId = storage.storeGame(game.play(Black to (3, 3)))
+      firstId must_== secondId
     }
 
   }

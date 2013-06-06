@@ -36,7 +36,7 @@ class MainServlet extends JoogoStack {
     if (params.get("x").isDefined && params.get("y").isDefined) {
       val x = params.get("x").get.toInt
       val y = params.get("y").get.toInt
-      val newId = store(game(params("id")).get.play(x, y))
+      val newId = store(game(params("id")).get.move(x, y))
       serveGame(newId)
     }
     else serveGame(params("id"))

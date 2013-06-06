@@ -5,39 +5,60 @@ package com.github.joonasrouhiainen.joogo.model
  *
  * @author Joonas Rouhiainen
  */
-case class Game private(players: Map[Color, Player], boardStates: Seq[Board], result: Option[Result]) {
+case class Game private(boardWidth: Int, boardHeight: Int, players: Map[Color, Player], plays: List[Play], result: Option[Result]) {
 
   require(players.size == 2)
 
   def this(boardWidth: Int, boardHeight: Int, players: Map[Color, Player]) {
-    this(players, Seq(new Board(boardWidth, boardHeight)), None)
+    this(boardWidth, boardHeight, players, List(), None)
   }
 
   /**
    * Returns the newest board state.
    */
-  def board: Board = boardStates.head
+  def board: Board = boardOnMove(moveNumber)
+
+  def boardOnMove(number: Int): Board = {
+    require(0 < number && number <= moveNumber)
+
+    plays.takeRight(number).foldRight(new Board(boardWidth, boardHeight)) {
+      (p, boardState) => boardState(p)
+    }
+  }
 
   def isFinished: Boolean = result.isDefined
 
-  def moveNumber: Int = boardStates.size
+  def moveNumber: Int = 1 + plays.size
 
-  def pass: Game = {
-    require(!isFinished)
-    val passingWillEndGame = moveNumber >= 2 && board.intersections == boardStates(1).intersections
-
-    if (passingWillEndGame) copy(result = Some(chineseScore))
-    else withMove(board.play(board.whoseTurn.pass))
-  }
-
-  def play(x: Int, y: Int): Game = play(Coords(x, y))
-
-  def play(coords: Coords): Game = {
-    require(!isFinished)
-    if (board.canPlay(whoseTurn to coords)) {
-      withMove(board.play(whoseTurn to coords))
+  private def move(m: Move): Game = {
+    if (board.canPlay(m)) {
+      copy(plays = m :: plays)
     }
     else copy()
+  }
+
+  private def pass(p: Pass): Game = {
+    val passingWillEndGame = moveNumber >= 2 && plays(0).isInstanceOf[Pass]
+
+    if (passingWillEndGame) copy(result = Some(chineseScore))
+    else                    copy(plays  = p :: plays)
+  }
+
+  // Convenience method for testing
+  def pass: Game = play(whoseTurn pass)
+
+  // Convenience method for testing
+  def move(x: Int, y: Int): Game = {
+    play(whoseTurn to (x, y))
+  }
+
+  def play(p: Play): Game = {
+    require(!isFinished)
+
+    p match {
+      case m: Move => move(m)
+      case p: Pass => pass(p)
+    }
   }
 
   def resign: Game = {
@@ -56,7 +77,5 @@ case class Game private(players: Map[Color, Player], boardStates: Seq[Board], re
   }
 
   def whoseTurn: Color = board.whoseTurn
-
-  private def withMove(boardState: Board): Game = copy(boardStates = boardStates.+:(boardState))
 
 }
