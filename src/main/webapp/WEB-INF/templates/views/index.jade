@@ -1,7 +1,15 @@
 h1 Create game
 
 form(action="/" method="POST")
-    input#x(name="x" placeholder="width")
-    span x
-    input#y(name="y" placeholder="height")
-    button(type="submit") New board
+    p
+        input#x(name="x" placeholder="width")
+        span x
+        input#y(name="y" placeholder="height")
+    p
+        input#b(name="b" placeholder="Black player")
+        span vs
+        input#w(name="w" placeholder="White player")
+    p
+        input#komi(name="komi" placeholder="Komi")
+    p
+        button(type="submit") New board

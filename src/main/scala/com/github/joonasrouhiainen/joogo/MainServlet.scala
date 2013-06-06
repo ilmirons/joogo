@@ -45,13 +45,13 @@ class MainServlet extends JoogoStack {
   }
 
   post("/g/:id/pass") {
-    store(game(params("id")).get.pass)
-    serveGame(params("id"))
+    val newId = store(game(params("id")).get.pass)
+    serveGame(newId)
   }
 
   post("/g/:id/resign") {
-    store(game(params("id")).get.resign)
-    serveGame(params("id"))
+    val newId = store(game(params("id")).get.resign)
+    serveGame(newId)
   }
 
   post("/") {

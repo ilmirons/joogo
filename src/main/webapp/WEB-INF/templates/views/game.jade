@@ -3,6 +3,7 @@
 -@ val gameId: String
 -@ val game: Game
 - val board = game.board
+- val gameRoot = "/g/" + gameId
 
 h1 JooGo
 
@@ -15,7 +16,7 @@ h1 JooGo
                     - for (x <- 1 to board.width)
                         - val colClass = "col-" + x
                         td(class={if (x == board.width) colClass + " col-last" else colClass})
-                            form(action={"/g/" + gameId} method="POST")
+                            form(action=gameRoot method="POST")
                                 input(type="hidden" name="x" value={x})
                                 input(type="hidden" name="y" value={y})
                                 - val isHoshi    = board.hoshi.contains(new Coords(x, y))
@@ -28,8 +29,8 @@ h1 JooGo
 p = "Move " + game.moveNumber + ". " + (if (game.isFinished) "Game over. Result: " + game.result.get + "." else board.whoseTurn + "'s turn.")
 p = "Captured stones: " + board.capturesForColors
 
-form(action="/pass" method="POST")
+form(action={gameRoot + "/pass"} method="POST")
     button(type="submit") Pass turn
 
-form(action="/resign" method="POST")
+form(action={gameRoot + "/resign"} method="POST")
     button(type="submit") Resign

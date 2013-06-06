@@ -1,11 +1,13 @@
 package com.github.joonasrouhiainen.joogo.data
 
-import scala.util.Random
 import com.github.joonasrouhiainen.joogo.model.Game
 
 class RuntimeGameStorage extends GameStorage {
 
   var storage = Map[String, Game]()
+
+  // Identify by players, enough for test purposes but two players can't have multiple games together
+  private def id(game: Game): String = game.players.hashCode.toString
 
   override def gamesCount(): Int = storage.size
 
@@ -16,9 +18,8 @@ class RuntimeGameStorage extends GameStorage {
       storage.find(pair => pair._2 == game).get._1
     }
     else {
-      val id: String = Random.alphanumeric.slice(0, 10).mkString
-      storage += (id -> game)
-      id
+      storage += (id(game) -> game)
+      id(game)
     }
   }
 
