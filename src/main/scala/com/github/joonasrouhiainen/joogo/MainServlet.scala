@@ -83,7 +83,10 @@ class MainServlet extends JoogoStack with JValueResult with JacksonJsonSupport w
           val gameId = (json \ "game").extract[String]
           println("Got move " + coords + " for game " + gameId)
           play(gameId, coords)
-          broadcast(json)
+
+          val boardState = ("board" -> storage.getGame(gameId).get.board)
+
+          send(compact(("board" -> "whee.")))
       }
     }
   }

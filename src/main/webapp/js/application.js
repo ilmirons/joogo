@@ -45,9 +45,7 @@ $(function() {
   };
 
   request.onError = function(rs) {
-    content.html($('<p>', {
-      text: 'Sorry, but there\'s some problem with your ' + 'socket or the server is down'
-    }));
+    console.log("error with socket or server down");
   };
 
   subSocket = socket.subscribe(request);
