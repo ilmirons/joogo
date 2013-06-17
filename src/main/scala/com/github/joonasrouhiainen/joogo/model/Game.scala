@@ -53,7 +53,7 @@ case class Game private(boardWidth: Int, boardHeight: Int, players: Map[Color, P
   }
 
   def play(p: Play): Game = {
-    require(!isFinished)
+    if (isFinished) throw new GameAlreadyFinishedException
 
     p match {
       case m: Move => move(m)
