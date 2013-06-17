@@ -59,7 +59,7 @@ class MainServlet extends JoogoStack {
       val players: Map[Color, Player] = Map(Black -> new Player(params("b")), White -> new Player(params("w")))
 
       val id = newGame(x, y, players)
-      serveGame(id)
+      redirect("/g/" + id)
     }
   }
   
