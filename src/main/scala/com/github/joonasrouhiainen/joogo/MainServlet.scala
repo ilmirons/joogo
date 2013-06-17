@@ -33,17 +33,22 @@ class MainServlet extends JoogoStack with JValueResult with JacksonJsonSupport w
     jade("index")
   }
 
-  def serveGame(id: String) = {
+  def gamePage(id: String) = {
     contentType = "text/html"
     jade("game", "game" -> storage.getGame(id).get, "gameId" -> id)
   }
 
-  get("/")  {
+  get("/") {
     serveCreation
   }
 
   get("/g/:id") {
-    serveGame(params("id"))
+    gamePage(params("id"))
+  }
+
+  get("/API/g/:id") {
+    contentType = formats("json")
+    storage.getGame(params("id")).get.board.toString
   }
 
   def play(gameId: String, coords: Coords) {
@@ -53,12 +58,12 @@ class MainServlet extends JoogoStack with JValueResult with JacksonJsonSupport w
 
   post("/g/:id/pass") {
     val newId = store(game(params("id")).get.pass)
-    serveGame(newId)
+    gamePage(newId)
   }
 
   post("/g/:id/resign") {
     val newId = store(game(params("id")).get.resign)
-    serveGame(newId)
+    gamePage(newId)
   }
 
   post("/") {
@@ -83,10 +88,7 @@ class MainServlet extends JoogoStack with JValueResult with JacksonJsonSupport w
           val gameId = (json \ "game").extract[String]
           println("Got move " + coords + " for game " + gameId)
           play(gameId, coords)
-
-          val boardState = ("board" -> storage.getGame(gameId).get.board)
-
-          send(compact(("board" -> "whee.")))
+          send(compact("board" -> storage.getGame(gameId).get.board.toString))
       }
     }
   }

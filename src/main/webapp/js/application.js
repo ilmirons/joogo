@@ -32,8 +32,21 @@ $(function() {
     var message = rs.responseBody;
     try {
       var json = jQuery.parseJSON(message);
-      console.log("got a message");
-      console.log(json);
+      var board = json.board;
+
+      _(board.split("\n")).each(function(row, y) {
+        _(row.split("")).each(function(character, x) {
+          var btn = $(".board .row-" + (y+1) + " .col-" + (x+1) + " button");
+
+          if (character == "+") {
+            btn.removeClass("b").removeClass("w").addClass("empty");
+          }
+          else {
+            btn.removeClass("empty").addClass(character);
+          }
+        });
+      });      
+
     } catch (e) {
       console.log('This doesn\'t look like a valid JSON object: ', message.data);
       return;
