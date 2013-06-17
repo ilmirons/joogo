@@ -2,8 +2,22 @@ package com.github.joonasrouhiainen.joogo
 
 import com.github.joonasrouhiainen.joogo.model._
 import com.github.joonasrouhiainen.joogo.data.RuntimeGameStorage
+import org.scalatra.json.JacksonJsonSupport
+import org.scalatra.SessionSupport
 
-class MainServlet extends JoogoStack {
+import org.scalatra.atmosphere._
+import org.scalatra.json.{JValueResult, JacksonJsonSupport}
+import org.json4s._
+import JsonDSL._
+import java.util.Date
+import java.text.SimpleDateFormat
+
+import scala.concurrent._
+import ExecutionContext.Implicits.global
+
+class MainServlet extends JoogoStack with JValueResult with JacksonJsonSupport with SessionSupport with AtmosphereSupport {
+
+  implicit protected val jsonFormats: Formats = DefaultFormats
 
   val storage = new RuntimeGameStorage
 
@@ -60,6 +74,20 @@ class MainServlet extends JoogoStack {
 
       val id = newGame(x, y, players)
       redirect("/g/" + id)
+    }
+  }
+
+  atmosphere("/the-chat") {
+    new AtmosphereClient {
+      def receive: AtmoReceive = {
+        case Connected => println("Client %s connected" format uuid)
+        case Disconnected(ClientDisconnected, _) => println("Client %s disconnected" format uuid)
+        case Disconnected(ServerDisconnected, _) => println("Server disconnected the client %s" format uuid)
+        case JsonMessage(json) =>
+          val coords = Coords((json \ "x").extract[Int], (json \ "y").extract[Int])
+          println("Got move " + coords)
+          broadcast(json)
+      }
     }
   }
   

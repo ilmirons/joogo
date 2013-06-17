@@ -25,6 +25,10 @@ object JoogoBuild extends Build {
       libraryDependencies ++= Seq(
         "org.scalatra" %% "scalatra" % ScalatraVersion,
         "org.scalatra" %% "scalatra-scalate" % ScalatraVersion,
+        "org.scalatra" %% "scalatra-atmosphere" % "2.2.1",
+        "org.scalatra" %% "scalatra-json" % "2.2.1",
+        "org.json4s"   %% "json4s-jackson" % "3.2.4",
+        "org.eclipse.jetty" % "jetty-websocket" % "8.1.10.v20130312" % "container",
         "com.typesafe.akka" % "akka-testkit_2.10" % "2.1.4",
         "org.scalatra" %% "scalatra-specs2" % ScalatraVersion % "test",
         "ch.qos.logback" % "logback-classic" % "1.0.6" % "runtime",
