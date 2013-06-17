@@ -46,14 +46,9 @@ class MainServlet extends JoogoStack with JValueResult with JacksonJsonSupport w
     serveGame(params("id"))
   }
 
-  post("/g/:id") {
-    if (params.get("x").isDefined && params.get("y").isDefined) {
-      val x = params.get("x").get.toInt
-      val y = params.get("y").get.toInt
-      val newId = store(game(params("id")).get.move(x, y))
-      serveGame(newId)
-    }
-    else serveGame(params("id"))
+  def play(gameId: String, coords: Coords) {
+    println("played at " + coords)
+    val newId = store(game(gameId).get.move(coords.x, coords.y))
   }
 
   post("/g/:id/pass") {
@@ -85,7 +80,9 @@ class MainServlet extends JoogoStack with JValueResult with JacksonJsonSupport w
         case Disconnected(ServerDisconnected, _) => println("Server disconnected the client %s" format uuid)
         case JsonMessage(json) =>
           val coords = Coords((json \ "x").extract[Int], (json \ "y").extract[Int])
-          println("Got move " + coords)
+          val gameId = (json \ "game").extract[String]
+          println("Got move " + coords + " for game " + gameId)
+          play(gameId, coords)
           broadcast(json)
       }
     }

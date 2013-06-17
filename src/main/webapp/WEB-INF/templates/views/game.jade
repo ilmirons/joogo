@@ -24,6 +24,7 @@
           li = "White: " + board.capturesForColors(White)
     .span9
       .board
+        input#game-id(type="hidden" value={gameId})
         table
           - for (y <- 1 to board.height)
             - val rowClass = "row-" + y

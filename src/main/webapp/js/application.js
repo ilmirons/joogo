@@ -1,11 +1,7 @@
 $(function() {
   "use strict";
 
-  var detect = $("#detect");
-  var header = $('#header');
-  var content = $('#content');
-  var input = $('#input');
-  var status = $('#status');
+  var gameId = $(".board input#game-id");
   var socket = $.atmosphere;
   var subSocket;
 //  var transport = 'long-polling';
@@ -20,11 +16,6 @@ $(function() {
   };
 
   request.onOpen = function(response) {
-    content.html($('<p>', {
-      text: 'Atmosphere connected using ' + response.transport
-    }));
-    input.removeAttr('disabled').focus();
-    status.text('Choose name:');
     transport = response.transport;
 
     if (response.transport == "local") {
@@ -38,9 +29,6 @@ $(function() {
 
   request.onMessage = function(rs) {
 
-    // We need to be logged first.
-    if (!myName) return;
-
     var message = rs.responseBody;
     try {
       var json = jQuery.parseJSON(message);
@@ -49,18 +37,6 @@ $(function() {
     } catch (e) {
       console.log('This doesn\'t look like a valid JSON object: ', message.data);
       return;
-    }
-
-    if (!logged) {
-      logged = true;
-      status.text(myName + ': ').css('color', 'blue');
-      input.removeAttr('disabled').focus();
-      subSocket.pushLocal(myName);
-    } else {
-      input.removeAttr('disabled');
-      var me = json.author == author;
-      var date = typeof(json.time) == 'string' ? parseInt(json.time) : json.time;
-      addMessage(json.author, json.message, me ? 'blue' : 'black', new Date(date));
     }
   };
 
@@ -78,11 +54,12 @@ $(function() {
 
   $(".board button").click(function() {
     var coords = $(this).attr("value").split(",");
+    var gid = parseInt(gameId.attr("value"), 10);
     var x = parseInt(coords[0], 10);
     var y = parseInt(coords[1], 10);
 
     var json = {
-      author: "defaultplayer",
+      game: gid,
       x: x,
       y: y
     };
