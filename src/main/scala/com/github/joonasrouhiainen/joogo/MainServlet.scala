@@ -2,18 +2,16 @@ package com.github.joonasrouhiainen.joogo
 
 import com.github.joonasrouhiainen.joogo.model._
 import com.github.joonasrouhiainen.joogo.data.RuntimeGameStorage
-import org.scalatra.json.JacksonJsonSupport
 import org.scalatra.SessionSupport
 
 import org.scalatra.atmosphere._
 import org.scalatra.json.{JValueResult, JacksonJsonSupport}
 import org.json4s._
 import JsonDSL._
-import java.util.Date
-import java.text.SimpleDateFormat
 
 import scala.concurrent._
 import ExecutionContext.Implicits.global
+import com.github.joonasrouhiainen.joogo.dto.GameDto
 
 class MainServlet extends JoogoStack with JValueResult with JacksonJsonSupport with SessionSupport with AtmosphereSupport {
 
@@ -48,7 +46,8 @@ class MainServlet extends JoogoStack with JValueResult with JacksonJsonSupport w
 
   get("/API/g/:id") {
     contentType = formats("json")
-    storage.getGame(params("id")).get.board.toString
+    val id = params("id")
+    storage.getGame(id).get: GameDto
   }
 
   def play(gameId: String, coords: Coords) {
@@ -86,8 +85,8 @@ class MainServlet extends JoogoStack with JValueResult with JacksonJsonSupport w
         case JsonMessage(json) =>
           val coords = Coords((json \ "x").extract[Int], (json \ "y").extract[Int])
           val gameId = (json \ "game").extract[String]
-          println("Got move " + coords + " for game " + gameId)
           play(gameId, coords)
+
           send(compact("board" -> storage.getGame(gameId).get.board.toString))
       }
     }
