@@ -8,6 +8,7 @@
       h1 All games
       hr.space
       .well
+        p= games.size + " games:"
         table.table.table-striped
           - if (games isEmpty)
             tbody No games found on server.
@@ -19,7 +20,7 @@
                 th Board
                 th Result
             tbody
-              - games map
+              = games map
                 - (game: Game) =>
                   tr
                     td= game.players(Black).id
