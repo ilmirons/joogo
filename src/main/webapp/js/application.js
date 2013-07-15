@@ -8,7 +8,7 @@ $(function() {
   var transport = 'websocket';
 
   var request = {
-    url: "/the-chat",
+    url: "/play",
     contentType: "application/json",
     logLevel: 'debug',
     transport: transport,
@@ -16,11 +16,7 @@ $(function() {
   };
 
   request.onOpen = function(response) {
-    transport = response.transport;
-
-    if (response.transport == "local") {
-      subSocket.pushLocal("Name?");
-    }
+    socket.info("Socket open");
   };
 
   request.onReconnect = function(rq, rs) {
@@ -28,8 +24,8 @@ $(function() {
   };
 
   request.onMessage = function(rs) {
-
     var message = rs.responseBody;
+
     try {
       var json = jQuery.parseJSON(message);
       var board = json.board;
@@ -45,9 +41,9 @@ $(function() {
             btn.removeClass("empty").addClass(character);
           }
         });
-      });      
-
-    } catch (e) {
+      });
+    }
+    catch (e) {
       console.log('This doesn\'t look like a valid JSON object: ', message.data);
       return;
     }

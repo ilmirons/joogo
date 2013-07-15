@@ -44,3 +44,9 @@
       button.btn.btn-large(type="submit") Pass turn
     form.span6(action={gameRoot + "/resign"} method="POST")
       button.btn.btn-large(type="submit") Resign
+  hr
+  h2 Moves
+  ol
+    = game.plays.reverse map
+      - (play: Play) =>
+        li= play
