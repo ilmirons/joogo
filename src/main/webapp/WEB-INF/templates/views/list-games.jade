@@ -8,16 +8,22 @@
       h1 All games
       hr.space
       .well
-        table.table.table-hover
-          thead
-            tr
-              th Black
-              th White
-              th Result
-          tbody
-            = games map
-              - (game: Game) =>
-                tr
-                  td= game.players(Black).id
-                  td= game.players(White).id
-                  td= game.result getOrElse "no result"
+        table.table.table-striped
+          - if (games isEmpty)
+            tbody No games found on server.
+          - else
+            thead
+              tr
+                th Black
+                th White
+                th Board
+                th Result
+            tbody
+              - games map
+                - (game: Game) =>
+                  tr
+                    td= game.players(Black).id
+                    td= game.players(White).id
+                    td= game.board.width + "x" + game.board.height
+                    td
+                      = if (game isFinished) { game.result getOrElse "no result" } else "Unfinished"
