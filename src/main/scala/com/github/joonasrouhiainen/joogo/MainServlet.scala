@@ -26,18 +26,18 @@ class MainServlet extends JoogoStack with JValueResult with JacksonJsonSupport w
     store(new Game(x, y, players))
   }
 
-  def serveCreation() = {
-    contentType = "text/html"
-    jade("index")
-  }
-
   def gamePage(id: String) = {
     contentType = "text/html"
     jade("game", "game" -> storage.getGame(id).get, "gameId" -> id)
   }
 
   get("/") {
-    serveCreation
+    contentType = "text/html"
+    jade("index")
+  }
+
+  get("/g") {
+    jade("list-games", "games" -> storage.games)
   }
 
   get("/g/:id") {

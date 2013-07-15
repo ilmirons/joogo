@@ -9,7 +9,9 @@ class RuntimeGameStorage extends GameStorage {
   // Identify by players, enough for test purposes but two players can't have multiple games together
   private def id(game: Game): String = game.players.hashCode.toString
 
-  override def gamesCount(): Int = storage.size
+  override def games: Seq[Game] = storage.values.toSeq
+
+  override def gamesCount: Int = storage.size
 
   override def getGame(id: String): Option[Game] = storage.get(id)
 

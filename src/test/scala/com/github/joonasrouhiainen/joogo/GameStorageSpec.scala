@@ -49,4 +49,22 @@ class GameStorageSpec extends Specification {
 
   }
 
+  "Storing three new games to a game storage" should {
+
+    val storage: GameStorage = new RuntimeGameStorage
+
+    "make the storage contain all three" in {
+      val game2 = new Game(9, 9, Map(Black -> new Player("bl"), White -> new Player("wh")))
+      val game3 = new Game(19, 19, Map(Black -> new Player("bla"), White -> new Player("whi")))
+
+      storage.storeGame(game)
+      storage.storeGame(game2)
+      storage.storeGame(game3)
+
+      storage.games.size must_== 3
+      Seq(game, game2, game3).forall(storage.games.contains _) must beTrue
+    }
+
+  }
+
 }

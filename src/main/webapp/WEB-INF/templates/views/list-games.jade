@@ -1,0 +1,23 @@
+- import com.github.joonasrouhiainen.joogo.model._
+
+-@ val games: Iterable[Game]
+
+.container-fluid
+  .row-fluid
+    .hero-unit.span12.text-center
+      h1 All games
+      hr.space
+      .well
+        table.table.table-hover
+          thead
+            tr
+              th Black
+              th White
+              th Result
+          tbody
+            = games map
+              - (game: Game) =>
+                tr
+                  td= game.players(Black).id
+                  td= game.players(White).id
+                  td= game.result getOrElse "no result"
