@@ -5,4 +5,7 @@
   <group name="styles">
     <css>/less/style.less</css>
   </group>
+  <group name="scripts">
+    <js>/coffee/*.coffee</js>
+  </group>
 </groups>
