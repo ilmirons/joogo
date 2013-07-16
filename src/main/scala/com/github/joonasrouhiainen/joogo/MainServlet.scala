@@ -7,13 +7,15 @@ import org.scalatra.SessionSupport
 import org.scalatra.atmosphere._
 import org.scalatra.json.{JValueResult, JacksonJsonSupport}
 import org.json4s._
-import JsonDSL._
+import org.json4s.jackson.Serialization.write
 
-import scala.concurrent._
-import ExecutionContext.Implicits.global
 import com.github.joonasrouhiainen.joogo.dto.GameDto
 import scala.util.Random
 import scala.annotation.tailrec
+
+// Define execution context
+import scala.concurrent.ExecutionContext
+import ExecutionContext.Implicits.global
 
 class MainServlet extends JoogoStack with JValueResult with JacksonJsonSupport with SessionSupport with AtmosphereSupport {
 
@@ -111,7 +113,8 @@ class MainServlet extends JoogoStack with JValueResult with JacksonJsonSupport w
             case "resign" => store(game(gameId).get.resign)
             case "pass"   => store(game(gameId).get.pass)
           }
-          send(compact("board" -> game(gameId).get.board.toString))
+          val jsonResponse = write(game(gameId).get: GameDto)
+          send(jsonResponse)
         }
       }
     }

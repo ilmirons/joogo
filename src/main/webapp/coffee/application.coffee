@@ -22,18 +22,24 @@ $ ->
 
   request.onMessage = (rs) ->
     message = rs.responseBody
+
     try
       json = jQuery.parseJSON(message)
       board = json.board
-      _(board.split("\n")).each (row, y) ->
-        _(row.split("")).each (character, x) ->
+      _(board).each (row, y) ->
+        _(row).each (character, x) ->
           btn = $(".board .row-" + (y + 1) + " .col-" + (x + 1) + " button")
+
           if character is "+"
             btn.removeClass("b").removeClass("w").addClass "empty"
           else
             btn.removeClass("empty").addClass character
+
+      $("#whoseTurn").text(json.whoseTurn)
+      $("#capturesB").text(json.capturesForColors.b)
+      $("capturesW").text(json.capuresForColors.w)
     catch e
-      console.log "This doesn't look like a valid JSON object: ", message.data
+      console.log "This doesn't look like a valid JSON object: ", message
       return
 
   request.onClose = (rs) ->

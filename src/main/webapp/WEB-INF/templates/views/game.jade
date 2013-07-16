@@ -13,15 +13,21 @@
           li.nav-header = "Move " + game.moveNumber
           li
             | It is
-            strong = board.whoseTurn + "'s"
+            strong
+              span#whoseTurn= board.whoseTurn
+              | 's
             | turn. (that's you!)
           li = if (game.isFinished) "Game over. Result: " + game.result.get + "."
           li.nav-header Players
           li = "Black: " + game.players(Black)
           li = "White: " + game.players(White)
           li.nav-header Captured
-          li = "Black: " + board.capturesForColors(Black)
-          li = "White: " + board.capturesForColors(White)
+          li
+            | Black:
+            span#capturesB= board.capturesForColors(Black)
+          li
+            | White:
+            span#capturesW= board.capturesForColors(White)
     .span9
       .board
         input#game-id(type="hidden" value={gameId})
@@ -44,9 +50,3 @@
       button#pass.btn.btn-large Pass turn
     .span6
       button#resign.btn.btn-large Resign
-  hr
-  h2 Moves
-  ol
-    = game.plays.reverse map
-      - (play: Play) =>
-        li= play
