@@ -40,10 +40,10 @@
                       .hoshi
   hr
   .row-fluid.actions
-    form.span6(action={gameRoot + "/pass"} method="POST")
-      button.btn.btn-large(type="submit") Pass turn
-    form.span6(action={gameRoot + "/resign"} method="POST")
-      button.btn.btn-large(type="submit") Resign
+    .span6
+      button#pass.btn.btn-large Pass turn
+    .span6
+      button#resign.btn.btn-large Resign
   hr
   h2 Moves
   ol

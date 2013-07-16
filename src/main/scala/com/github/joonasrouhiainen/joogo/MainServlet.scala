@@ -80,16 +80,6 @@ class MainServlet extends JoogoStack with JValueResult with JacksonJsonSupport w
     }
   }
 
-  post("/g/:id/pass") {
-    val newId = store(game(params("id")).get.pass)
-    gamePage(newId)
-  }
-
-  post("/g/:id/resign") {
-    val newId = store(game(params("id")).get.resign)
-    gamePage(newId)
-  }
-
   post("/") {
     if (params.get("x").isDefined && params.get("y").isDefined) {
       val x  = params("x").toInt
@@ -107,12 +97,22 @@ class MainServlet extends JoogoStack with JValueResult with JacksonJsonSupport w
         case Connected => println("Client %s connected" format uuid)
         case Disconnected(ClientDisconnected, _) => println("Client %s disconnected" format uuid)
         case Disconnected(ServerDisconnected, _) => println("Server disconnected the client %s" format uuid)
-        case JsonMessage(json) =>
-          val coords = Coords((json \ "x").extract[Int], (json \ "y").extract[Int])
-          val gameId = (json \ "game").extract[String]
-          play(gameId, coords)
 
-          send(compact("board" -> storage.getGame(gameId).get.board.toString))
+        case JsonMessage(json) => {
+          val gameId = (json \ "gameId").extract[String]
+
+          (json \ "type").extract[String] match {
+            case "move" => {
+              val coordsArr = (json \ "data" \ "moveTo")
+              val coords = Coords(coordsArr(0).extract[Int], coordsArr(1).extract[Int])
+
+              play(gameId, coords)
+            }
+            case "resign" => store(game(gameId).get.resign)
+            case "pass"   => store(game(gameId).get.pass)
+          }
+          send(compact("board" -> game(gameId).get.board.toString))
+        }
       }
     }
   }

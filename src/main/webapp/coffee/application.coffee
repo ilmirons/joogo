@@ -1,6 +1,7 @@
 $ ->
   "use strict"
   gameId = $(".board input#game-id")
+  gid = parseInt(gameId.attr("value"), 10)
   socket = $.atmosphere
   subSocket = undefined
 
@@ -31,8 +32,6 @@ $ ->
             btn.removeClass("b").removeClass("w").addClass "empty"
           else
             btn.removeClass("empty").addClass character
-
-
     catch e
       console.log "This doesn't look like a valid JSON object: ", message.data
       return
@@ -44,14 +43,30 @@ $ ->
     console.log "error with socket or server down"
 
   subSocket = socket.subscribe(request)
+  
   $(".board button").click ->
     coords = $(this).attr("value").split(",")
-    gid = parseInt(gameId.attr("value"), 10)
     x = parseInt(coords[0], 10)
     y = parseInt(coords[1], 10)
+    
     json =
-      game: gid
-      x: x
-      y: y
+      type: "move"
+      gameId: gid
+      data:
+        moveTo: [x, y]
+
+    subSocket.push jQuery.stringifyJSON(json)
+
+  $("#resign").click ->
+    json =
+      type: "resign"
+      gameId: gid
+
+    subSocket.push jQuery.stringifyJSON(json)
+
+  $("#pass").click ->
+    json =
+      type: "pass"
+      gameId: gid
 
     subSocket.push jQuery.stringifyJSON(json)
