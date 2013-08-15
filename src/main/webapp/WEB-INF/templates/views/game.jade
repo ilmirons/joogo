@@ -14,7 +14,7 @@
           li
             | It is
             strong
-              span#whoseTurn= board.whoseTurn
+              span#whoseTurn>= board.whoseTurn
               | 's
             | turn. (that's you!)
           li = if (game.isFinished) "Game over. Result: " + game.result.get + "."
