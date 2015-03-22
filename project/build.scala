@@ -10,7 +10,7 @@ object JoogoBuild extends Build {
   val Organization = "com.github.joonasrouhiainen"
   val Name = "JooGo"
   val Version = "0.1.0-SNAPSHOT"
-  val ScalaVersion = "2.10.0"
+  val ScalaVersion = "2.10.4"
   val ScalatraVersion = "2.2.0"
 
   lazy val project = Project (

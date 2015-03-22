@@ -5,6 +5,7 @@
 ```sh
 $ cd JooGo
 $ ./sbt
+> wro4j
 > container:start
 > browse
 ```

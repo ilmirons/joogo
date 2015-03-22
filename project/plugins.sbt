@@ -2,6 +2,6 @@ resolvers += Resolver.url("sbt-plugin-snapshots", new URL("http://scalasbt.artif
 
 addSbtPlugin("com.mojolly.scalate" % "xsbt-scalate-generator" % "0.4.2")
 
-addSbtPlugin("com.bowlingx" %% "xsbt-wro4j-plugin" % "0.3.0-SNAPSHOT")
+addSbtPlugin("com.bowlingx" %% "xsbt-wro4j-plugin" % "0.3.5")
 
-addSbtPlugin("org.scalatra.sbt" % "scalatra-sbt" % "0.2.0")
+addSbtPlugin("org.scalatra.sbt" % "scalatra-sbt" % "0.4.0-SNAPSHOT")
